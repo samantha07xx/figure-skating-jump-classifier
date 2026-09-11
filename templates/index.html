@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Figure Skating Jump Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <div class="heading">
+          <p class="eyebrow">Single-jump MP4 classifier</p>
+          <h1>Figure Skating Jump Classifier</h1>
+        </div>
+
+        <form class="upload-form" method="post" enctype="multipart/form-data">
+          <label class="file-picker">
+            <span>Choose pre-cropped jump video</span>
+            <input type="file" name="video" accept="video/*" required>
+          </label>
+          <button type="submit">Predict Jump</button>
+        </form>
+
+        {% if error %}
+          <div class="message error">{{ error }}</div>
+        {% endif %}
+
+        {% if video_url %}
+          <div class="preview">
+            <video controls src="{{ video_url }}"></video>
+          </div>
+        {% endif %}
+
+        {% if result %}
+          <section class="prediction">
+            <p class="label">Prediction</p>
+            <h2>{{ result.label }}</h2>
+            <p class="confidence">{{ "%.1f"|format(result.confidence * 100) }}% confidence</p>
+
+            <div class="probabilities">
+              {% for label, probability in result.probabilities.items() %}
+                <div class="prob-row">
+                  <span>{{ label }}</span>
+                  <meter min="0" max="1" value="{{ probability }}"></meter>
+                  <strong>{{ "%.1f"|format(probability * 100) }}%</strong>
+                </div>
+              {% endfor %}
+            </div>
+          </section>
+        {% endif %}
+      </section>
+    </main>
+  </body>
+</html>
