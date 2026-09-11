@@ -26,9 +26,25 @@
           <div class="message error">{{ error }}</div>
         {% endif %}
 
-        {% if video_url %}
-          <div class="preview">
-            <video controls src="{{ video_url }}"></video>
+        {% if yolo_error %}
+          <div class="message error">{{ yolo_error }}</div>
+        {% endif %}
+
+        {% if video_url or annotated_video_url %}
+          <div class="video-grid">
+            {% if video_url %}
+              <div class="video-block">
+                <p>Original upload</p>
+                <video controls src="{{ video_url }}"></video>
+              </div>
+            {% endif %}
+
+            {% if annotated_video_url %}
+              <div class="video-block">
+                <p>YOLO skater overlay</p>
+                <video controls src="{{ annotated_video_url }}"></video>
+              </div>
+            {% endif %}
           </div>
         {% endif %}
 

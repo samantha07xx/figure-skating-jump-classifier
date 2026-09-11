@@ -19,3 +19,4 @@ reports/**
 *.mkv
 *.h5
 *.keras
+*.pt

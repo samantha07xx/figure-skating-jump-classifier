@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, send_from_directory
 from werkzeug.utils import secure_filename
 
 from src.jump_classifier.predict import predict_video
+from src.jump_classifier.yolo_overlay import create_yolo_overlay
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOAD_DIR = BASE_DIR / "uploads"
@@ -23,7 +24,9 @@ def is_allowed_video(filename: str) -> bool:
 def index():
     result = None
     error = None
+    yolo_error = None
     video_url = None
+    annotated_video_url = None
 
     if request.method == "POST":
         uploaded_file = request.files.get("video")
@@ -38,12 +41,28 @@ def index():
             uploaded_file.save(saved_path)
             video_url = f"/uploads/{saved_name}"
 
+            annotated_name = f"{Path(saved_name).stem}_yolo.mp4"
+            annotated_path = UPLOAD_DIR / annotated_name
+
+            try:
+                create_yolo_overlay(saved_path, annotated_path)
+                annotated_video_url = f"/uploads/{annotated_name}"
+            except Exception as exc:
+                yolo_error = f"YOLO overlay failed: {exc}"
+
             try:
                 result = predict_video(saved_path, MODEL_PATH)
             except Exception as exc:
                 error = str(exc)
 
-    return render_template("index.html", result=result, error=error, video_url=video_url)
+    return render_template(
+        "index.html",
+        result=result,
+        error=error,
+        yolo_error=yolo_error,
+        video_url=video_url,
+        annotated_video_url=annotated_video_url,
+    )
 
 
 @app.route("/uploads/<path:filename>")

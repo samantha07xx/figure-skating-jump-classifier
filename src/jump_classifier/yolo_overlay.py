@@ -7,13 +7,14 @@ def create_yolo_overlay(
     input_video_path: str | Path,
     output_video_path: str | Path,
     model_name: str = "yolov8n.pt",
+    confidence_threshold: float = 0.25,
 ) -> Path:
-    """Optional helper: draw pretrained YOLO person boxes on a video."""
+    """Draw pretrained YOLO person/skater boxes on a video."""
     try:
         from ultralytics import YOLO
     except ImportError as exc:
         raise ImportError(
-            "YOLO overlay requires ultralytics. Install it with: pip install ultralytics"
+            "YOLO overlay requires ultralytics. Install dependencies with: pip install -r requirements.txt"
         ) from exc
 
     input_video_path = Path(input_video_path)
@@ -25,25 +26,40 @@ def create_yolo_overlay(
     if not capture.isOpened():
         raise ValueError(f"Could not open video: {input_video_path}")
 
-    fps = capture.get(cv2.CAP_PROP_FPS) or 24
-    width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    writer = cv2.VideoWriter(
-        str(output_video_path),
-        cv2.VideoWriter_fourcc(*"mp4v"),
-        fps,
-        (width, height),
-    )
+    writer = None
+    try:
+        fps = capture.get(cv2.CAP_PROP_FPS) or 24
+        width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        if width <= 0 or height <= 0:
+            raise ValueError(f"Could not read video dimensions: {input_video_path}")
 
-    while True:
-        success, frame = capture.read()
-        if not success:
-            break
+        writer = cv2.VideoWriter(
+            str(output_video_path),
+            cv2.VideoWriter_fourcc(*"mp4v"),
+            fps,
+            (width, height),
+        )
+        if not writer.isOpened():
+            raise ValueError(f"Could not create annotated video: {output_video_path}")
 
-        results = yolo(frame, verbose=False)
-        annotated = results[0].plot()
-        writer.write(annotated)
+        while True:
+            success, frame = capture.read()
+            if not success:
+                break
 
-    capture.release()
-    writer.release()
+            # COCO class 0 is "person"; for this MVP, the skater is treated as the person in frame.
+            results = yolo.predict(
+                frame,
+                classes=[0],
+                conf=confidence_threshold,
+                verbose=False,
+            )
+            annotated = results[0].plot()
+            writer.write(annotated)
+    finally:
+        capture.release()
+        if writer is not None:
+            writer.release()
+
     return output_video_path

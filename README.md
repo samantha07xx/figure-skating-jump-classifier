@@ -17,7 +17,7 @@ The MVP is intentionally simple:
 4. Train a CNN-BiLSTM classifier from scratch.
 5. Evaluate with accuracy, precision, recall, F1, and a confusion matrix.
 6. Run inference from a simple web upload page.
-7. Optionally add a pretrained YOLO skater/person bounding box overlay.
+7. Use pretrained YOLO to draw a skater/person bounding box overlay on the uploaded video.
 
 This project does not do full-video jump detection, LLMs, RAG, agents, or MCP.
 
@@ -84,10 +84,15 @@ Then open:
 http://127.0.0.1:5000
 ```
 
-Upload a pre-cropped MP4 and the page will show a video preview plus the predicted jump type and confidence.
+Upload a pre-cropped MP4 and the page will show:
 
-## Optional YOLO Overlay
+- the original video
+- a YOLO annotated video with the skater/person bounding box
+- the predicted jump type
+- confidence scores
 
-YOLO is not required for the MVP. If you install `ultralytics`, the optional module can detect the person/skater in each frame and write an annotated video.
+## YOLO Overlay
+
+YOLO is part of the MVP. The app uses pretrained YOLO to detect the person/skater in each frame and write an annotated video.
 
 YOLO is only for drawing the bounding box. The jump type still comes from the CNN-BiLSTM model.
