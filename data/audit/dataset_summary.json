@@ -1,0 +1,88 @@
+{
+  "counts_by_camera": {
+    "1": 253,
+    "10": 253,
+    "11": 253,
+    "12": 253,
+    "2": 253,
+    "3": 253,
+    "4": 253,
+    "5": 253,
+    "6": 253,
+    "7": 253,
+    "8": 253,
+    "9": 253
+  },
+  "counts_by_jump_class": {
+    "Axel": 480,
+    "Flip": 480,
+    "Loop": 480,
+    "Lutz": 480,
+    "Salchow": 480,
+    "Toeloop": 480
+  },
+  "counts_by_skater": {
+    "A": 756,
+    "B": 756,
+    "C": 768,
+    "D": 756
+  },
+  "counts_by_skater_class": {
+    "A": {
+      "Axel": 120,
+      "Flip": 120,
+      "Loop": 120,
+      "Lutz": 120,
+      "Salchow": 120,
+      "Toeloop": 120
+    },
+    "B": {
+      "Axel": 120,
+      "Flip": 120,
+      "Loop": 120,
+      "Lutz": 120,
+      "Salchow": 120,
+      "Toeloop": 120
+    },
+    "C": {
+      "Axel": 120,
+      "Flip": 120,
+      "Loop": 120,
+      "Lutz": 120,
+      "Salchow": 120,
+      "Toeloop": 120
+    },
+    "D": {
+      "Axel": 120,
+      "Flip": 120,
+      "Loop": 120,
+      "Lutz": 120,
+      "Salchow": 120,
+      "Toeloop": 120
+    }
+  },
+  "duplicate_paths": [],
+  "excluded_combination_jump_videos": 156,
+  "group_id_verification": {
+    "all_groups_camera_free": true,
+    "groups_with_multiple_cameras": 253,
+    "mismatches": []
+  },
+  "ignored_metadata_mp4_files": 3036,
+  "malformed_or_unexpected_filenames": [],
+  "missing_camera_view_groups": [],
+  "mp4_header_issues": [],
+  "physical_jump_attempts_all_labels": 253,
+  "physical_jump_attempts_six_class": 240,
+  "structure_matches_expected": true,
+  "total_real_mp4_files": 3036,
+  "unexpected_jump_labels": [],
+  "usable_six_class_mp4_files": 2880,
+  "views_per_physical_attempt": {
+    "distribution": {
+      "12": 253
+    },
+    "max": 12,
+    "min": 12
+  }
+}

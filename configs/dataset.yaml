@@ -1,0 +1,15 @@
+dataset:
+  name: FS-Jump3D
+  official_repository: https://github.com/ryota-skating/FS-Jump3D
+  rgb_video_root: data/raw/fs-jump3d
+  audit_output_dir: data/audit
+  target_classes:
+    - Axel
+    - Flip
+    - Loop
+    - Lutz
+    - Salchow
+    - Toeloop
+  excluded_labels:
+    - Comb
+  grouping_rule: skater + jump_type + attempt_number

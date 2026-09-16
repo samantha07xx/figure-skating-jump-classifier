@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Environments
+.venv/
+venv/
+env/
+
+# OS/editor metadata
+.DS_Store
+__MACOSX/
+._*
+.idea/
+.vscode/
+
+# Raw and extracted datasets
+data/raw/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.zip
+
+# Large/generated project artifacts
+models/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+reports/
+uploads/
+data/processed/
+data/interim/
+
+# Keep small reproducible audit outputs tracked.
+!data/
+!data/audit/
+!data/audit/*.csv
+!data/audit/*.md
+!data/audit/*.json
