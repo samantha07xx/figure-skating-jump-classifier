@@ -108,6 +108,47 @@ def preprocess_video(
     )
 
 
+def preprocess_video_streaming(
+    video_path: Path,
+    config: PreprocessConfig | None = None,
+) -> VideoPreprocessingResult:
+    """Decode sequentially while retaining only uniformly selected frames."""
+    config = config or PreprocessConfig()
+    video_path = Path(video_path)
+    capture = cv2.VideoCapture(str(video_path))
+    if not capture.isOpened():
+        raise VideoDecodeError(f"could not open video: {video_path}")
+    frame_count = int(capture.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+    fps = float(capture.get(cv2.CAP_PROP_FPS) or 0.0)
+    if frame_count <= 0:
+        capture.release()
+        return preprocess_video(video_path, config)
+    indices = uniform_sample_indices(frame_count, config.frames_per_clip)
+    wanted = set(indices)
+    selected: dict[int, np.ndarray] = {}
+    decoded = 0
+    try:
+        for frame_index in range(indices[-1] + 1):
+            ok, frame = capture.read()
+            if not ok:
+                break
+            decoded += 1
+            if frame_index in wanted:
+                selected[frame_index] = preprocess_bgr_frame(frame, config.image_size)
+    finally:
+        capture.release()
+    if decoded != indices[-1] + 1:
+        return preprocess_video(video_path, config)
+    frames = np.stack([selected[index] for index in indices]).astype(np.float32)
+    return VideoPreprocessingResult(
+        frames=frames,
+        sampling_indices=indices,
+        decoded_frame_count=decoded,
+        fps=fps,
+        duration_seconds=decoded / fps if fps > 0 else 0.0,
+    )
+
+
 def validate_video_decode(video_path: Path, full_decode: bool = False) -> dict[str, object]:
     video_path = Path(video_path)
     capture = cv2.VideoCapture(str(video_path))

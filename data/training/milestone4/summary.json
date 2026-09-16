@@ -1,0 +1,20 @@
+{
+  "device": "mps",
+  "parameter_count": 395222,
+  "epochs_trained": 24,
+  "best_epoch": 19,
+  "best_val_loss": 0.7804363571383335,
+  "best_val_accuracy": 0.6712962962962963,
+  "early_stopping_triggered": true,
+  "runtime_seconds": 2472.3174271250027,
+  "final_epoch": {
+    "epoch": 24,
+    "train_loss": 0.7299910620564506,
+    "train_accuracy": 0.6899801587301587,
+    "val_loss": 0.9969209352577174,
+    "val_accuracy": 0.5601851851851852,
+    "learning_rate": 0.0001,
+    "elapsed_seconds": 52.14788958299323
+  },
+  "smoke": false
+}

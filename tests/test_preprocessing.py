@@ -12,6 +12,7 @@ from fs_jump3d.preprocessing import (
     preprocess_bgr_frame,
     preprocess_frame_sequence,
     preprocess_video,
+    preprocess_video_streaming,
     uniform_sample_indices,
 )
 
@@ -108,6 +109,17 @@ def test_preprocess_video_returns_pytorch_friendly_tensor(tmp_path: Path) -> Non
     assert result.frames.max() <= 1.0
     assert result.sampling_indices[0] == 0
     assert result.sampling_indices[-1] == result.decoded_frame_count - 1
+
+
+@pytest.mark.parametrize("frame_count", [3, 36])
+def test_streaming_matches_full_preprocessing(tmp_path: Path, frame_count: int) -> None:
+    video_path = tmp_path / "sample.mp4"
+    write_synthetic_video(video_path, frame_count=frame_count)
+    config = PreprocessConfig(frames_per_clip=8, image_size=16)
+    full = preprocess_video(video_path, config)
+    streamed = preprocess_video_streaming(video_path, config)
+    assert streamed.sampling_indices == full.sampling_indices
+    np.testing.assert_array_equal(streamed.frames, full.frames)
 
 
 def test_invalid_video_handling_is_explicit(tmp_path: Path) -> None:

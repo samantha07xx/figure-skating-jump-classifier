@@ -41,7 +41,7 @@ The MVP includes:
 - single-video inference
 - a minimal web interface for upload/prediction
 
-The current repository state has completed Milestones 1 through 3: dataset inspection/audit, repository scaffolding, parser tests, grouped train/validation/test splitting, split tests, split artifacts, deterministic video preprocessing, preprocessing tests, and OpenCV decode validation artifacts.
+The current repository state has completed Milestones 1 through 4, including the first CNN-BiLSTM training run. The held-out test set remains reserved for Milestone 5 evaluation.
 
 ## 3. Out-of-Scope Features
 
@@ -404,7 +404,7 @@ The training pipeline should include:
 - load split-aware dataset index
 - filter to `is_target_class = True`
 - verify all samples have split assignments
-- instantiate train, validation, and test datasets
+- instantiate train and validation datasets for training; instantiate the test dataset only in the later evaluation milestone
 - create PyTorch DataLoaders
 - apply training-only augmentations
 - build model from config
@@ -483,8 +483,8 @@ Each training run should save a run directory containing:
 - epoch-level training and validation metrics
 - best checkpoint
 - final checkpoint if useful
-- test metrics
-- confusion matrix
+- test metrics after the held-out evaluation milestone
+- confusion matrix after the held-out evaluation milestone
 - notes about device and package versions
 
 Suggested ignored artifact layout:
@@ -807,9 +807,9 @@ Verified decode/preprocessing findings:
 - representative preprocessed dtype: `float32`
 - representative value range: `[0, 1]`
 
-### Milestone 4: CNN-BiLSTM Model
+### Milestone 4: CNN-BiLSTM Model And Training
 
-Implement the PyTorch model.
+Status: complete. The first model was trained on the grouped training and validation splits, without test-set access.
 
 Outputs:
 
@@ -817,21 +817,17 @@ Outputs:
 - BiLSTM temporal encoder
 - classifier head
 - forward-pass tests
+- split-aware Dataset/DataLoaders
+- training loop, validation, early stopping, and checkpointing
+- smoke and real training runs
 
-### Milestone 5: Training Pipeline
+Actual model: a four-block custom CNN with channels `16/32/64/128`, global average pooling and a 128-dimensional frame projection; a one-layer bidirectional LSTM with 128 hidden units per direction; dropout/dense classification head with six raw logits. Total trainable parameters: `395,222`.
 
-Implement training and validation.
+The run used seed `42`, 32 frames, 224-pixel input, batch size `4`, two workers, Adam at `1e-4`, CrossEntropyLoss, MPS, and validation-loss early stopping with patience `5`. It stopped after `24` epochs. The best checkpoint was epoch `19` with validation loss `0.7804` and validation accuracy `67.13%`. The final epoch had train loss/accuracy `0.7300 / 69.00%` and validation loss/accuracy `0.9969 / 56.02%`. Total runtime was `2,472` seconds; after the first cache-building epoch, epochs averaged `51.2` seconds. Full history is in `data/training/milestone4/` and the ignored best checkpoint is in `models/runs/milestone4/`.
 
-Outputs:
+The training loader streams frame decoding and uses an ignored uint8 cache to avoid holding all 300 full-resolution frames in memory. This is an implementation adjustment, not a change to sampling, image size, class mapping, split, or training hyperparameters. Validation performance fluctuated sharply, and the best checkpoint should be used for later evaluation. No test metrics are claimed here.
 
-- training script
-- config-driven training
-- checkpointing
-- early stopping
-- metrics logging
-- smoke test
-
-### Milestone 6: Evaluation
+### Milestone 5: Evaluation
 
 Evaluate the selected model on the held-out grouped test set.
 
@@ -843,7 +839,7 @@ Outputs:
 - confusion matrix
 - written evaluation report
 
-### Milestone 7: Inference
+### Milestone 6: Inference
 
 Implement single-clip prediction.
 
@@ -854,7 +850,7 @@ Outputs:
 - probability distribution output
 - tests for response shape and error handling
 
-### Milestone 8: Web MVP
+### Milestone 7: Web MVP
 
 Build a minimal local web application for upload and prediction.
 
@@ -866,7 +862,7 @@ Outputs:
 - simple result view
 - web/API smoke tests
 
-### Milestone 9: Final Documentation And Packaging
+### Milestone 8: Final Documentation And Packaging
 
 Prepare project for review or portfolio use.
 

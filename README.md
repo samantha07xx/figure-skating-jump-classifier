@@ -2,7 +2,7 @@
 
 End-to-end PyTorch project for classifying already-trimmed single-jump figure skating MP4 clips into six jump types: Axel, Flip, Loop, Lutz, Salchow, and Toeloop.
 
-This repository is currently stopped after **Milestone 3: Video Preprocessing**. It does not yet implement model training, evaluation, inference, or a web application.
+Milestones 1-4 are complete, including the first trained CNN-BiLSTM. Held-out test evaluation, inference, and the web application are later milestones.
 
 ## Dataset
 
@@ -87,10 +87,29 @@ python3 scripts/validate_preprocessing.py --split-csv data/splits/dataset_split.
 
 Milestone 3 validation opened and decoded the first frame for all 2,880 six-class split videos. Representative clips were fully preprocessed to verify tensor shape, dtype, range, and sampling indices.
 
+## Milestone 4 Training
+
+The PyTorch Dataset reads `data/splits/dataset_split.csv`. Training uses only `train` rows and validation uses only `val` rows. The `test` rows are not loaded by the training DataLoaders. The fixed label order is Axel, Flip, Loop, Lutz, Salchow, Toeloop.
+
+The model applies one shared custom CNN to all 32 frames, projects each frame to 128 features, then passes the sequence to a one-layer bidirectional LSTM with 128 hidden units per direction. A dropout/dense head returns six raw logits. Training uses CrossEntropyLoss and Adam.
+
+Run the smoke check and full training from the repository root:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python scripts/train.py --smoke
+.venv/bin/python scripts/train.py
+```
+
+The initial settings are in `configs/train.yaml`: seed 42, 32 frames, 224-pixel input, batch size 4, at most 30 epochs, learning rate 1e-4, early stopping patience 5, and two DataLoader workers. The run uses MPS when available, otherwise CUDA or CPU. Training streams decoded frames and retains only the selected 32, matching the Milestone 3 output without holding all 300 full-resolution frames in memory. Deterministic preprocessed frame caches under `data/processed/` and checkpoints under `models/` are ignored by Git. Each run writes a resolved config, epoch history, summary, and best checkpoint. Validation loss selects the checkpoint; no test metrics are computed here.
+
+The first run trained for 24 epochs on MPS and stopped early. Epoch 19 produced the best validation loss, 0.7804, with 67.13% validation accuracy. The 395,222-parameter model and run details are documented in `data/training/milestone4/summary.md`; the checkpoint is at `models/runs/milestone4/best_model.pt` and is not tracked. Validation metrics varied markedly across epochs, so use the saved best checkpoint and consult the full history rather than the last epoch alone.
+
 ## Tests
 
 Run tests with:
 
 ```bash
-python3 -m pytest
+.venv/bin/python -m pytest
 ```
