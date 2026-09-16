@@ -2,7 +2,7 @@
 
 End-to-end PyTorch project for classifying already-trimmed single-jump figure skating MP4 clips into six jump types: Axel, Flip, Loop, Lutz, Salchow, and Toeloop.
 
-Milestones 1-5 are complete, including the first held-out evaluation. Single-clip inference and the web application are later milestones.
+Milestones 1-6 are complete, including held-out evaluation and single-clip inference. The web application is a later milestone.
 
 ## Dataset
 
@@ -119,6 +119,18 @@ To verify the checkpoint and test split without evaluating videos, run:
 ```
 
 `scripts/evaluate.py` reproduces the held-out evaluation artifacts. The test result is for the fixed Milestone 4 model; do not use it to select a different checkpoint or tune this model.
+
+## Milestone 6 Single-Video Inference
+
+Classify one already-trimmed MP4 containing one primary jump:
+
+```bash
+.venv/bin/python scripts/predict_video.py path/to/trimmed_jump.mp4
+```
+
+The CLI prints the predicted class, confidence, all six class probabilities, device, and timing. `src/fs_jump3d/inference.py` provides a reusable `VideoPredictor.from_config()` and structured `InferenceResult` for the later web layer. `configs/inference.yaml` pins the evaluated epoch 19 checkpoint by SHA-256. The model loads on MPS when available, with CPU fallback, and uses the same deterministic OpenCV preprocessing as training/evaluation. It needs only one clip, not 12 camera views.
+
+Engineering validation on three train/validation clips is recorded in `data/inference/milestone6/validation_summary.md`. Warmed inference was about one second per clip, mostly OpenCV decoding; the web app should load the predictor once at startup. This model does not detect or trim jumps in full programs, classify combinations, count rotations, score quality/GOE, or guarantee generalization to arbitrary broadcast, phone, or internet footage. Softmax confidence is not a calibrated guarantee.
 
 ## Tests
 

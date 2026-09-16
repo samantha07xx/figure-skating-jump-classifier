@@ -1,0 +1,4 @@
+checkpoint: models/runs/milestone4/best_model.pt
+expected_sha256: 31d6fbba519b628798b225c9276c895fdeb318312a2afe8598ac3b406dacdefe
+expected_epoch: 19
+device: auto

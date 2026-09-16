@@ -41,7 +41,7 @@ The MVP includes:
 - single-video inference
 - a minimal web interface for upload/prediction
 
-The current repository state has completed Milestones 1 through 5, including the first CNN-BiLSTM training run and one held-out grouped test evaluation.
+The current repository state has completed Milestones 1 through 6, including the first CNN-BiLSTM training run, one held-out grouped test evaluation, and reusable single-video inference.
 
 ## 3. Out-of-Scope Features
 
@@ -845,7 +845,7 @@ Observed limitations include substantial viewpoint variation (camera accuracy `4
 
 ### Milestone 6: Inference
 
-Implement single-clip prediction.
+Status: complete. Single-clip prediction uses the fixed epoch 19 checkpoint, with its SHA-256 pinned in `configs/inference.yaml`. `VideoPredictor` loads the model once, checks checkpoint metadata and class order, selects MPS when available with CPU fallback, and returns a structured result for one already-trimmed MP4.
 
 Outputs:
 
@@ -853,6 +853,8 @@ Outputs:
 - saved class mapping support
 - probability distribution output
 - tests for response shape and error handling
+
+The path reuses streaming OpenCV preprocessing (`32` RGB frames at `224x224`, float32 `[0,1]`), adds a batch dimension, runs the CNN-BiLSTM in inference mode, and applies softmax to six logits. The CLI is `scripts/predict_video.py`. Engineering validation on three train/validation clips found probability sums near `1`, exact repeated-output agreement in the sample run, and warmed per-video latency near one second, mainly from decoding. Results and timing are recorded in `data/inference/milestone6/validation_summary.md`. The Milestone 5 test metrics remain unchanged; no retraining or test-driven model changes were made.
 
 ### Milestone 7: Web MVP
 
