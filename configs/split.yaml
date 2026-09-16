@@ -1,0 +1,18 @@
+split:
+  source_index: data/audit/dataset_index.csv
+  output_dir: data/splits
+  seed: 42
+  ratios:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  split_level: group_id
+  target_classes:
+    - Axel
+    - Flip
+    - Loop
+    - Lutz
+    - Salchow
+    - Toeloop
+  exclude_combination_jumps: true
+  expected_views_per_group: 12

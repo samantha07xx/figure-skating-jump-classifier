@@ -2,7 +2,7 @@
 
 End-to-end PyTorch project for classifying already-trimmed single-jump figure skating MP4 clips into six jump types: Axel, Flip, Loop, Lutz, Salchow, and Toeloop.
 
-This repository is currently stopped at **Milestone 1: Dataset Inspection / Audit**. It does not yet implement splitting, preprocessing, model training, inference, or a web application.
+This repository is currently stopped after **Milestone 2: Grouped Train/Validation/Test Split**. It does not yet implement preprocessing, model training, evaluation, inference, or a web application.
 
 ## Dataset
 
@@ -55,6 +55,23 @@ A_Salchow_4
 ```
 
 All camera views for the same group must remain in the same split.
+
+## Milestone 2 Split
+
+Run the grouped split from the repository root:
+
+```bash
+python3 scripts/create_split.py --index-path data/audit/dataset_index.csv --output-dir data/splits
+```
+
+Milestone 2 uses a deterministic `70/15/15` train/validation/test split with seed `42`, assigned at the physical-attempt `group_id` level. Combination jumps are excluded from the ML split.
+
+This writes:
+
+- `data/splits/dataset_split.csv`
+- `data/splits/dataset_index_with_splits.csv`
+- `data/splits/split_summary.md`
+- `data/splits/split_summary.json`
 
 ## Tests
 

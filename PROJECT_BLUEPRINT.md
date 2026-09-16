@@ -41,7 +41,7 @@ The MVP includes:
 - single-video inference
 - a minimal web interface for upload/prediction
 
-The current repository state has completed Milestone 1 only: dataset inspection, audit artifacts, repository scaffolding, parser tests, and documentation.
+The current repository state has completed Milestone 1 and Milestone 2: dataset inspection/audit, repository scaffolding, parser tests, grouped train/validation/test splitting, split tests, and split artifacts.
 
 ## 3. Out-of-Scope Features
 
@@ -294,7 +294,7 @@ Requirements:
 
 Because each target class has `40` physical attempts and each attempt has `12` camera views, the split should operate on the `240` target physical attempts, not the `2,880` individual videos.
 
-A reasonable initial split is `70/15/15` or `80/10/10`, chosen in Milestone 2 after reviewing group-level balance. The exact split should be documented in the generated split summary.
+Milestone 2 selected `70/15/15` with seed `42`. This was chosen because each target class has `40` physical-attempt groups, which divides cleanly into `28` train, `6` validation, and `6` test groups per class while preserving larger validation/test sets than `80/10/10`.
 
 ### B. Stronger Future Research Evaluation
 
@@ -638,10 +638,10 @@ Rules:
 - do not rewrite remote history without explicit authorization
 - push only when a remote is configured and authentication/permissions are clear
 
-Current state after Milestone 1:
+Current state after GitHub migration and Milestone 2:
 
 - local Git repository exists
-- no remote is configured
+- `main` tracks `origin/main`
 - raw data lives under `data/raw/fs-jump3d/`
 - raw data is ignored by Git
 
@@ -766,16 +766,18 @@ Completed outputs:
 
 ### Milestone 2: Grouped Train/Validation/Test Split
 
-Implement group-aware split generation for the six-class target dataset.
+Status: complete.
 
-Outputs:
+Completed outputs:
 
 - split-aware dataset index
 - split summary
 - tests proving no group leakage
-- documentation of selected split ratios
-
-Do not begin this milestone until explicitly approved.
+- documentation of selected `70/15/15` split ratio
+- `data/splits/dataset_split.csv`
+- `data/splits/dataset_index_with_splits.csv`
+- `data/splits/split_summary.md`
+- `data/splits/split_summary.json`
 
 ### Milestone 3: Video Preprocessing
 
