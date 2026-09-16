@@ -2,7 +2,7 @@
 
 End-to-end PyTorch project for classifying already-trimmed single-jump figure skating MP4 clips into six jump types: Axel, Flip, Loop, Lutz, Salchow, and Toeloop.
 
-Milestones 1-4 are complete, including the first trained CNN-BiLSTM. Held-out test evaluation, inference, and the web application are later milestones.
+Milestones 1-5 are complete, including the first held-out evaluation. Single-clip inference and the web application are later milestones.
 
 ## Dataset
 
@@ -105,6 +105,20 @@ python3 -m venv .venv
 The initial settings are in `configs/train.yaml`: seed 42, 32 frames, 224-pixel input, batch size 4, at most 30 epochs, learning rate 1e-4, early stopping patience 5, and two DataLoader workers. The run uses MPS when available, otherwise CUDA or CPU. Training streams decoded frames and retains only the selected 32, matching the Milestone 3 output without holding all 300 full-resolution frames in memory. Deterministic preprocessed frame caches under `data/processed/` and checkpoints under `models/` are ignored by Git. Each run writes a resolved config, epoch history, summary, and best checkpoint. Validation loss selects the checkpoint; no test metrics are computed here.
 
 The first run trained for 24 epochs on MPS and stopped early. Epoch 19 produced the best validation loss, 0.7804, with 67.13% validation accuracy. The 395,222-parameter model and run details are documented in `data/training/milestone4/summary.md`; the checkpoint is at `models/runs/milestone4/best_model.pt` and is not tracked. Validation metrics varied markedly across epochs, so use the saved best checkpoint and consult the full history rather than the last epoch alone.
+
+## Milestone 5 Evaluation
+
+The fixed epoch 19 checkpoint was evaluated once on the 432-video, 36-attempt grouped test split. Video-level accuracy is **65.97%** and macro F1 is **0.652**. Averaging class probabilities across each attempt's 12 camera views gives **72.22%** group-level accuracy and **0.704** group-level macro F1. These are different units of analysis.
+
+The full report, per-video predictions, per-group predictions, metrics, confusion matrices, and plots are in `data/evaluation/milestone5/`. The strongest video-level class by F1 is Axel; Toeloop is weakest, with 43 of its 72 views predicted as Salchow. Camera accuracy varies from 47.22% to 80.56%. All four skaters appear in the train, validation, and test splits, so this is not unseen-skater generalization.
+
+To verify the checkpoint and test split without evaluating videos, run:
+
+```bash
+.venv/bin/python scripts/evaluate.py --verify-only
+```
+
+`scripts/evaluate.py` reproduces the held-out evaluation artifacts. The test result is for the fixed Milestone 4 model; do not use it to select a different checkpoint or tune this model.
 
 ## Tests
 

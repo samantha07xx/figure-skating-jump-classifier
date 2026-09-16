@@ -41,7 +41,7 @@ The MVP includes:
 - single-video inference
 - a minimal web interface for upload/prediction
 
-The current repository state has completed Milestones 1 through 4, including the first CNN-BiLSTM training run. The held-out test set remains reserved for Milestone 5 evaluation.
+The current repository state has completed Milestones 1 through 5, including the first CNN-BiLSTM training run and one held-out grouped test evaluation.
 
 ## 3. Out-of-Scope Features
 
@@ -829,7 +829,7 @@ The training loader streams frame decoding and uses an ignored uint8 cache to av
 
 ### Milestone 5: Evaluation
 
-Evaluate the selected model on the held-out grouped test set.
+Status: complete. The fixed epoch 19 checkpoint was evaluated once on the held-out grouped test set, without retraining or checkpoint reselection.
 
 Outputs:
 
@@ -838,6 +838,10 @@ Outputs:
 - macro and weighted metrics
 - confusion matrix
 - written evaluation report
+
+The test split contains `432` camera-view videos from `36` complete physical-attempt groups. Video-level accuracy was `65.97%` and macro F1 was `0.652`. Averaging the 12 class-probability vectors per attempt and taking the highest mean probability gave group-level accuracy `72.22%` and macro F1 `0.704`. These are distinct metrics with different sample units. The full per-class, camera, skater, confusion, and error analyses are in `data/evaluation/milestone5/`.
+
+Observed limitations include substantial viewpoint variation (camera accuracy `47.22%` to `80.56%`) and Toeloop being predicted as Salchow for `43` of its `72` test views. This split includes all four skaters in training, validation, and test, so the result is not a skater-independent estimate. The evaluation does not establish generalization to broadcast, phone, internet, or other uncontrolled footage. No test-driven model changes were made.
 
 ### Milestone 6: Inference
 

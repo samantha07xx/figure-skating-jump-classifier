@@ -1,0 +1,517 @@
+{
+  "checkpoint": "models/runs/milestone4/best_model.pt",
+  "checkpoint_sha256": "31d6fbba519b628798b225c9276c895fdeb318312a2afe8598ac3b406dacdefe",
+  "device": "mps",
+  "labels": [
+    "Axel",
+    "Flip",
+    "Loop",
+    "Lutz",
+    "Salchow",
+    "Toeloop"
+  ],
+  "group_aggregation": "arithmetic mean of the 12 camera-view class-probability vectors, followed by argmax",
+  "video_level": {
+    "sample_count": 432,
+    "accuracy": 0.6597222222222222,
+    "macro": {
+      "precision": 0.6597933111114808,
+      "recall": 0.6597222222222222,
+      "f1": 0.6515252516509616
+    },
+    "weighted": {
+      "precision": 0.6597933111114808,
+      "recall": 0.6597222222222222,
+      "f1": 0.6515252516509616
+    },
+    "per_class": {
+      "Axel": {
+        "precision": 0.8939393939393939,
+        "recall": 0.8194444444444444,
+        "f1-score": 0.855072463768116,
+        "support": 72.0
+      },
+      "Flip": {
+        "precision": 0.6557377049180327,
+        "recall": 0.5555555555555556,
+        "f1-score": 0.6015037593984962,
+        "support": 72.0
+      },
+      "Loop": {
+        "precision": 0.7101449275362319,
+        "recall": 0.6805555555555556,
+        "f1-score": 0.6950354609929078,
+        "support": 72.0
+      },
+      "Lutz": {
+        "precision": 0.6483516483516484,
+        "recall": 0.8194444444444444,
+        "f1-score": 0.7239263803680982,
+        "support": 72.0
+      },
+      "Salchow": {
+        "precision": 0.5612244897959183,
+        "recall": 0.7638888888888888,
+        "f1-score": 0.6470588235294118,
+        "support": 72.0
+      },
+      "Toeloop": {
+        "precision": 0.48936170212765956,
+        "recall": 0.3194444444444444,
+        "f1-score": 0.3865546218487395,
+        "support": 72.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        59,
+        0,
+        0,
+        13,
+        0,
+        0
+      ],
+      [
+        0,
+        40,
+        14,
+        18,
+        0,
+        0
+      ],
+      [
+        0,
+        14,
+        49,
+        1,
+        0,
+        8
+      ],
+      [
+        7,
+        6,
+        0,
+        59,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        1,
+        0,
+        55,
+        16
+      ],
+      [
+        0,
+        1,
+        5,
+        0,
+        43,
+        23
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n        Axel       0.89      0.82      0.86        72\n        Flip       0.66      0.56      0.60        72\n        Loop       0.71      0.68      0.70        72\n        Lutz       0.65      0.82      0.72        72\n     Salchow       0.56      0.76      0.65        72\n     Toeloop       0.49      0.32      0.39        72\n\n    accuracy                           0.66       432\n   macro avg       0.66      0.66      0.65       432\nweighted avg       0.66      0.66      0.65       432\n"
+  },
+  "group_level": {
+    "sample_count": 36,
+    "accuracy": 0.7222222222222222,
+    "macro": {
+      "precision": 0.7150793650793651,
+      "recall": 0.7222222222222222,
+      "f1": 0.7041407666407666
+    },
+    "weighted": {
+      "precision": 0.7150793650793651,
+      "recall": 0.7222222222222222,
+      "f1": 0.7041407666407666
+    },
+    "per_class": {
+      "Axel": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 6.0
+      },
+      "Flip": {
+        "precision": 0.8,
+        "recall": 0.6666666666666666,
+        "f1-score": 0.7272727272727273,
+        "support": 6.0
+      },
+      "Loop": {
+        "precision": 0.8,
+        "recall": 0.6666666666666666,
+        "f1-score": 0.7272727272727273,
+        "support": 6.0
+      },
+      "Lutz": {
+        "precision": 0.8571428571428571,
+        "recall": 1.0,
+        "f1-score": 0.9230769230769231,
+        "support": 6.0
+      },
+      "Salchow": {
+        "precision": 0.5,
+        "recall": 0.8333333333333334,
+        "f1-score": 0.625,
+        "support": 6.0
+      },
+      "Toeloop": {
+        "precision": 0.3333333333333333,
+        "recall": 0.16666666666666666,
+        "f1-score": 0.2222222222222222,
+        "support": 6.0
+      }
+    },
+    "confusion_matrix": [
+      [
+        6,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        1,
+        1,
+        0,
+        0
+      ],
+      [
+        0,
+        1,
+        4,
+        0,
+        0,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        6,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        5,
+        1
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        5,
+        1
+      ]
+    ],
+    "classification_report": "              precision    recall  f1-score   support\n\n        Axel       1.00      1.00      1.00         6\n        Flip       0.80      0.67      0.73         6\n        Loop       0.80      0.67      0.73         6\n        Lutz       0.86      1.00      0.92         6\n     Salchow       0.50      0.83      0.62         6\n     Toeloop       0.33      0.17      0.22         6\n\n    accuracy                           0.72        36\n   macro avg       0.72      0.72      0.70        36\nweighted avg       0.72      0.72      0.70        36\n"
+  },
+  "by_camera": {
+    "1": {
+      "videos": 36,
+      "accuracy": 0.6944444444444444,
+      "macro_f1": 0.6837662337662338
+    },
+    "2": {
+      "videos": 36,
+      "accuracy": 0.8055555555555556,
+      "macro_f1": 0.8003552003552005
+    },
+    "3": {
+      "videos": 36,
+      "accuracy": 0.6666666666666666,
+      "macro_f1": 0.6585525585525586
+    },
+    "4": {
+      "videos": 36,
+      "accuracy": 0.6944444444444444,
+      "macro_f1": 0.6789987789987789
+    },
+    "5": {
+      "videos": 36,
+      "accuracy": 0.7222222222222222,
+      "macro_f1": 0.7154345654345655
+    },
+    "6": {
+      "videos": 36,
+      "accuracy": 0.6944444444444444,
+      "macro_f1": 0.6797184297184297
+    },
+    "7": {
+      "videos": 36,
+      "accuracy": 0.4722222222222222,
+      "macro_f1": 0.45808080808080803
+    },
+    "8": {
+      "videos": 36,
+      "accuracy": 0.5277777777777778,
+      "macro_f1": 0.5236171236171235
+    },
+    "9": {
+      "videos": 36,
+      "accuracy": 0.6666666666666666,
+      "macro_f1": 0.6683261183261183
+    },
+    "10": {
+      "videos": 36,
+      "accuracy": 0.7222222222222222,
+      "macro_f1": 0.7111111111111111
+    },
+    "11": {
+      "videos": 36,
+      "accuracy": 0.6111111111111112,
+      "macro_f1": 0.5972384097384097
+    },
+    "12": {
+      "videos": 36,
+      "accuracy": 0.6388888888888888,
+      "macro_f1": 0.6187830687830688
+    }
+  },
+  "by_skater": {
+    "A": {
+      "videos": 108,
+      "accuracy": 0.6851851851851852,
+      "macro_f1": 0.6209038612811554
+    },
+    "B": {
+      "videos": 108,
+      "accuracy": 0.6666666666666666,
+      "macro_f1": 0.6522306201730174
+    },
+    "C": {
+      "videos": 108,
+      "accuracy": 0.5925925925925926,
+      "macro_f1": 0.6095419602387049
+    },
+    "D": {
+      "videos": 108,
+      "accuracy": 0.6944444444444444,
+      "macro_f1": 0.6927523649693814
+    }
+  },
+  "errors": {
+    "error_count": 147,
+    "most_confused_pairs": [
+      {
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "count": 43
+      },
+      {
+        "true_label": "Flip",
+        "predicted_label": "Lutz",
+        "count": 18
+      },
+      {
+        "true_label": "Salchow",
+        "predicted_label": "Toeloop",
+        "count": 16
+      },
+      {
+        "true_label": "Loop",
+        "predicted_label": "Flip",
+        "count": 14
+      },
+      {
+        "true_label": "Flip",
+        "predicted_label": "Loop",
+        "count": 14
+      },
+      {
+        "true_label": "Axel",
+        "predicted_label": "Lutz",
+        "count": 13
+      },
+      {
+        "true_label": "Loop",
+        "predicted_label": "Toeloop",
+        "count": 8
+      },
+      {
+        "true_label": "Lutz",
+        "predicted_label": "Axel",
+        "count": 7
+      },
+      {
+        "true_label": "Lutz",
+        "predicted_label": "Flip",
+        "count": 6
+      },
+      {
+        "true_label": "Toeloop",
+        "predicted_label": "Loop",
+        "count": 5
+      },
+      {
+        "true_label": "Loop",
+        "predicted_label": "Lutz",
+        "count": 1
+      },
+      {
+        "true_label": "Toeloop",
+        "predicted_label": "Flip",
+        "count": 1
+      },
+      {
+        "true_label": "Salchow",
+        "predicted_label": "Loop",
+        "count": 1
+      }
+    ],
+    "strongest_class_by_f1": "Axel",
+    "weakest_class_by_f1": "Toeloop",
+    "correct_confidence_mean": 0.6656246393396144,
+    "correct_confidence_median": 0.6774951219558716,
+    "incorrect_confidence_mean": 0.6087504625320435,
+    "incorrect_confidence_median": 0.584035336971283,
+    "high_confidence_error_threshold": 0.8,
+    "high_confidence_error_count": 19,
+    "high_confidence_errors": [
+      {
+        "filepath": "skater_B/cam_8/Salchow_3.mp4",
+        "group_id": "B_Salchow_3",
+        "true_label": "Salchow",
+        "predicted_label": "Toeloop",
+        "confidence": 0.9121907949447632
+      },
+      {
+        "filepath": "skater_B/cam_7/Salchow_3.mp4",
+        "group_id": "B_Salchow_3",
+        "true_label": "Salchow",
+        "predicted_label": "Toeloop",
+        "confidence": 0.8998035788536072
+      },
+      {
+        "filepath": "skater_D/cam_1/Lutz_10.mp4",
+        "group_id": "D_Lutz_10",
+        "true_label": "Lutz",
+        "predicted_label": "Axel",
+        "confidence": 0.8959201574325562
+      },
+      {
+        "filepath": "skater_D/cam_12/Lutz_10.mp4",
+        "group_id": "D_Lutz_10",
+        "true_label": "Lutz",
+        "predicted_label": "Axel",
+        "confidence": 0.8619340658187866
+      },
+      {
+        "filepath": "skater_D/cam_7/Toeloop_3.mp4",
+        "group_id": "D_Toeloop_3",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8566625118255615
+      },
+      {
+        "filepath": "skater_B/cam_9/Salchow_3.mp4",
+        "group_id": "B_Salchow_3",
+        "true_label": "Salchow",
+        "predicted_label": "Toeloop",
+        "confidence": 0.8556918501853943
+      },
+      {
+        "filepath": "skater_D/cam_10/Toeloop_3.mp4",
+        "group_id": "D_Toeloop_3",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8556076884269714
+      },
+      {
+        "filepath": "skater_C/cam_2/Toeloop_1.mp4",
+        "group_id": "C_Toeloop_1",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8451996445655823
+      },
+      {
+        "filepath": "skater_D/cam_5/Toeloop_3.mp4",
+        "group_id": "D_Toeloop_3",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8318876028060913
+      },
+      {
+        "filepath": "skater_C/cam_5/Toeloop_1.mp4",
+        "group_id": "C_Toeloop_1",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8234977126121521
+      },
+      {
+        "filepath": "skater_D/cam_9/Toeloop_3.mp4",
+        "group_id": "D_Toeloop_3",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8223686218261719
+      },
+      {
+        "filepath": "skater_C/cam_7/Toeloop_1.mp4",
+        "group_id": "C_Toeloop_1",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.819656491279602
+      },
+      {
+        "filepath": "skater_C/cam_2/Toeloop_7.mp4",
+        "group_id": "C_Toeloop_7",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8152926564216614
+      },
+      {
+        "filepath": "skater_C/cam_8/Toeloop_7.mp4",
+        "group_id": "C_Toeloop_7",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8128233551979065
+      },
+      {
+        "filepath": "skater_A/cam_8/Toeloop_6.mp4",
+        "group_id": "A_Toeloop_6",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8082006573677063
+      },
+      {
+        "filepath": "skater_B/cam_2/Axel_1.mp4",
+        "group_id": "B_Axel_1",
+        "true_label": "Axel",
+        "predicted_label": "Lutz",
+        "confidence": 0.807625412940979
+      },
+      {
+        "filepath": "skater_D/cam_12/Toeloop_3.mp4",
+        "group_id": "D_Toeloop_3",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.8070386052131653
+      },
+      {
+        "filepath": "skater_D/cam_6/Toeloop_3.mp4",
+        "group_id": "D_Toeloop_3",
+        "true_label": "Toeloop",
+        "predicted_label": "Salchow",
+        "confidence": 0.806395947933197
+      },
+      {
+        "filepath": "skater_D/cam_11/Flip_8.mp4",
+        "group_id": "D_Flip_8",
+        "true_label": "Flip",
+        "predicted_label": "Lutz",
+        "confidence": 0.8012149333953857
+      }
+    ]
+  }
+}
