@@ -38,7 +38,7 @@ uploads/
 data/processed/
 data/interim/
 
-# Keep small reproducible audit outputs tracked.
+# Keep small reproducible audit/split/preprocessing outputs tracked.
 !data/
 !data/audit/
 !data/audit/*.csv

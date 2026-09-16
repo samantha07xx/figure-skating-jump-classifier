@@ -41,7 +41,7 @@ The MVP includes:
 - single-video inference
 - a minimal web interface for upload/prediction
 
-The current repository state has completed Milestone 1 and Milestone 2: dataset inspection/audit, repository scaffolding, parser tests, grouped train/validation/test splitting, split tests, and split artifacts.
+The current repository state has completed Milestones 1 through 3: dataset inspection/audit, repository scaffolding, parser tests, grouped train/validation/test splitting, split tests, split artifacts, deterministic video preprocessing, preprocessing tests, and OpenCV decode validation artifacts.
 
 ## 3. Out-of-Scope Features
 
@@ -343,12 +343,14 @@ Frame sampling:
 - include the first and last usable frame when practical
 - avoid assuming fixed FPS or fixed duration
 - handle variable-length clips deterministically
+- Milestone 3 implementation uses deterministic `linspace` sampling over decoded frame indices; the validated FS-Jump3D clips sample from index `0` through `299`
 
 Short-video handling:
 
 - if a clip has fewer than `32` readable frames, repeat frames or pad using the last valid frame
 - record or warn on unusually short clips
 - fail clearly if no readable frame exists
+- Milestone 3 behavior is explicit: use every decoded frame in order, then repeat the final valid frame until 32 frames are available
 
 Image processing:
 
@@ -364,6 +366,7 @@ Augmentation guidance:
 - keep validation and test preprocessing deterministic
 - start with conservative spatial augmentations, such as small crop/resize jitter, mild brightness/contrast changes, or horizontal flip only if label semantics remain valid
 - avoid aggressive transforms that destroy skating posture, blade/body cues, or camera geometry
+- Milestone 3 enables no augmentation; the base preprocessing path is deterministic for every split
 
 ## 13. CNN-BiLSTM Model Architecture
 
@@ -671,6 +674,7 @@ Preprocessing tests:
 - output tensor shape is correct
 - normalization range is `[0, 1]`
 - deterministic validation/test preprocessing
+- invalid/unreadable video handling is explicit
 
 Model tests:
 
@@ -781,13 +785,27 @@ Completed outputs:
 
 ### Milestone 3: Video Preprocessing
 
-Implement OpenCV video loading and deterministic frame sampling.
+Status: complete.
 
-Outputs:
+Completed outputs:
 
 - preprocessing module
-- dataset class or loader utilities
+- OpenCV decode/preprocessing validation script
+- preprocessing configuration
+- lightweight decode validation artifacts
 - tests for shape, normalization, RGB conversion, and short-video behavior
+
+Verified decode/preprocessing findings:
+
+- all `2,880` six-class split videos opened with OpenCV
+- all `2,880` decoded at least one frame
+- failed videos: `0`
+- frame count range: `300` to `300`
+- mean frame count: `300.00`
+- duration range: `5.0000s` to `5.0000s`
+- representative preprocessed tensor shape: `[32, 3, 224, 224]`
+- representative preprocessed dtype: `float32`
+- representative value range: `[0, 1]`
 
 ### Milestone 4: CNN-BiLSTM Model
 

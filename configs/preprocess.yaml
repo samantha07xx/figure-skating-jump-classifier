@@ -1,0 +1,12 @@
+preprocess:
+  frames_per_clip: 32
+  image_size: 224
+  color_format: RGB
+  tensor_shape: [T, C, H, W]
+  dtype: float32
+  normalization: [0.0, 1.0]
+  temporal_sampling: deterministic_uniform_full_clip
+  short_video_handling: repeat_final_valid_frame
+  augmentation:
+    enabled_in_milestone_3: false
+    notes: Training-only augmentation is intentionally not enabled in the deterministic base pipeline.
