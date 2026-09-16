@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Figure Skating Jump Recognition</title>
+  <link rel="stylesheet" href="/app.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar"><span class="mark" aria-hidden="true">✳</span><span>Figure Skating Jump Recognition</span></header>
+  <main>
+    <div class="heading"><h1>Analyze a jump</h1><p>Upload one already-trimmed single-jump MP4. Full skating programs are not supported.</p></div>
+    <div class="workspace">
+      <section class="input-pane" aria-label="Video upload">
+        <label id="dropzone" class="dropzone" for="video"><span class="upload-icon" aria-hidden="true">↑</span><strong>Choose an MP4 or drop it here</strong><span id="file-name">No video selected</span></label>
+        <input id="video" type="file" accept=".mp4,video/mp4" aria-label="Choose a single-jump MP4">
+        <video id="preview" controls playsinline hidden></video>
+        <div class="actions"><button id="predict" type="button" disabled>Analyze jump</button><span id="status" role="status" aria-live="polite"></span></div>
+        <p id="error" class="error" role="alert" hidden></p>
+      </section>
+      <section id="result" class="result" aria-label="Prediction" hidden>
+        <div class="result-title">Prediction</div>
+        <h2 id="predicted-label"></h2>
+        <div class="confidence"><strong id="confidence"></strong><span>Model confidence</span></div>
+        <div class="divider"></div>
+        <h3>Class probabilities</h3>
+        <div id="probabilities"></div>
+        <p class="note">Model confidence is not a guarantee of correctness.</p>
+      </section>
+    </div>
+    <details class="limitations"><summary>About this model and its limitations</summary><p>This six-class model was evaluated on a controlled FS-Jump3D held-out split: 65.97% video-level accuracy and 0.652 macro F1. It expects one already-trimmed jump. It does not locate jumps in full programs, classify combinations, count rotations, or score GOE or jump quality. Performance on broadcast, internet, or phone video is not established.</p></details>
+  </main>
+</body>
+</html>

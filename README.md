@@ -2,7 +2,23 @@
 
 End-to-end PyTorch project for classifying already-trimmed single-jump figure skating MP4 clips into six jump types: Axel, Flip, Loop, Lutz, Salchow, and Toeloop.
 
-Milestones 1-6 are complete, including held-out evaluation and single-clip inference. The web application is a later milestone.
+Milestones 1-7 are complete: audit, leakage-aware split, OpenCV preprocessing, CNN-BiLSTM training, held-out evaluation, single-video inference, and a local web MVP.
+
+## Run the Web MVP
+
+From the repository root:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
+```
+
+Open http://127.0.0.1:8000. The ignored fixed checkpoint `models/runs/milestone4/best_model.pt` must be present and match the SHA-256 in `configs/inference.yaml`; startup fails clearly otherwise. Select or drop one already-trimmed single-jump MP4, preview it, then click **Analyze jump**. The page displays the predicted class, model confidence, and all six probabilities. `POST /predict` accepts multipart field `video` and returns structured JSON. The 100 MB default upload limit is set in `configs/web.yaml` and can be overridden with `FS_JUMP3D_MAX_UPLOAD_MB`. Uploads use generated files in the system temporary directory and are deleted after each request.
+
+The model path is OpenCV frame sampling -> shared custom CNN frame encoder -> BiLSTM -> six-class classifier. The six classes are Axel, Flip, Loop, Lutz, Salchow, and Toeloop. The held-out grouped test result is 65.97% video-level accuracy and 0.652 macro F1. This is a four-skater controlled dataset; confidence is not guaranteed correctness, and arbitrary broadcast/phone/internet video performance is not established. The MVP does not detect jumps in full programs, classify combinations, count rotations, or score GOE/quality.
+
+Main project directories: `src/fs_jump3d/` (model, preprocessing, inference, web API), `web/` (static interface), `configs/` (reproducible settings), `scripts/` (CLI workflows), `tests/`, `data/audit/`, `data/splits/`, and ignored `data/raw/`, `data/processed/`, `models/`.
 
 ## Dataset
 

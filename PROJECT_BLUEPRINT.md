@@ -41,7 +41,7 @@ The MVP includes:
 - single-video inference
 - a minimal web interface for upload/prediction
 
-The current repository state has completed Milestones 1 through 6, including the first CNN-BiLSTM training run, one held-out grouped test evaluation, and reusable single-video inference.
+The current repository state has completed Milestones 1 through 7, including the first CNN-BiLSTM training run, one held-out grouped test evaluation, reusable single-video inference, and a local web MVP.
 
 ## 3. Out-of-Scope Features
 
@@ -858,15 +858,7 @@ The path reuses streaming OpenCV preprocessing (`32` RGB frames at `224x224`, fl
 
 ### Milestone 7: Web MVP
 
-Build a minimal local web application for upload and prediction.
-
-Outputs:
-
-- local web app
-- prediction endpoint
-- upload handling in ignored directory
-- simple result view
-- web/API smoke tests
+Status: complete. FastAPI serves a static single-page HTML/CSS/JavaScript interface. Its lifespan loads the pinned `VideoPredictor` once; requests reuse it under a lock. `POST /predict` streams one MP4 into a generated system temporary file, enforces the configurable 100 MB default limit, checks the MP4 container signature, calls the existing single-video inference path, and removes the file on both success and failure. OpenCV performs final decode validation. The page previews the selected clip and displays the predicted class, model confidence, and six probabilities with honest limitations. `GET /health` and `GET /config` support local readiness and upload-size display. The app starts with `.venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000`. Web/API tests mock inference; a separate real upload validates the fixed checkpoint path.
 
 ### Milestone 8: Final Documentation And Packaging
 
