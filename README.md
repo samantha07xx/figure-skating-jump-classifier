@@ -6,6 +6,8 @@ Milestones 1-7 are complete: audit, leakage-aware split, OpenCV preprocessing, C
 
 Post-MVP Phase 1 used train/validation only to compare conservative augmentation, AdamW weight decay, a validation-loss LR scheduler, and their limited combination. See [the validation-only experiment report](data/experiments/improvement_phase1/comparison.md). The augmentation run is a provisional validation winner, not the web model; the fixed production checkpoint and published held-out result below have not changed.
 
+The validation-selected augmentation checkpoint subsequently received a one-time final held-out evaluation: 71.99% video accuracy and 0.719 macro F1, versus 65.97% and 0.652 for the original model. See [the final evaluation comparison](data/evaluation/phase1_augmentation_final/final_comparison.md). The web MVP **still uses the original Milestone 4 checkpoint**; no production-model decision has been made.
+
 ## Run the Web MVP
 
 From the repository root:

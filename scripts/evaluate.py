@@ -24,6 +24,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate the fixed Milestone 4 checkpoint on the held-out test split.")
     parser.add_argument("--checkpoint", type=Path, default=PROJECT_ROOT / "models/runs/milestone4/best_model.pt")
     parser.add_argument("--training-summary", type=Path, default=PROJECT_ROOT / "data/training/milestone4/summary.json")
+    parser.add_argument("--expected-epoch", type=int, default=19)
     parser.add_argument("--split-csv", type=Path, default=PROJECT_ROOT / "data/splits/dataset_split.csv")
     parser.add_argument("--data-root", type=Path, default=PROJECT_ROOT / "data/raw/fs-jump3d")
     parser.add_argument("--output-dir", type=Path, default=PROJECT_ROOT / "data/evaluation/milestone5")
@@ -33,7 +34,8 @@ def main() -> None:
     parser.add_argument("--verify-only", action="store_true")
     args = parser.parse_args()
 
-    model, checkpoint, preprocess = verify_best_checkpoint(args.checkpoint, args.training_summary)
+    model, checkpoint, preprocess = verify_best_checkpoint(args.checkpoint, args.training_summary,
+                                                           expected_epoch=args.expected_epoch)
     dataset = TestVideoDataset(args.split_csv, args.data_root, preprocess)
     print(f"Verified checkpoint epoch {checkpoint['epoch']} and {len(dataset)} test videos in 36 groups", flush=True)
     if args.verify_only:

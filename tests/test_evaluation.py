@@ -65,6 +65,12 @@ def test_checkpoint_verification_uses_best_epoch(tmp_path: Path) -> None:
     summary_path.write_text(json.dumps({"best_epoch": 24, "best_val_loss": 0.78}))
     with pytest.raises(ValueError, match="epoch 19"):
         verify_best_checkpoint(checkpoint_path, summary_path)
+    with pytest.raises(ValueError, match="epoch 30"):
+        verify_best_checkpoint(checkpoint_path, summary_path, expected_epoch=30)
+    save_checkpoint(checkpoint_path, model, optimizer, 30, 0.76, 0.70, PreprocessConfig(32, 224))
+    summary_path.write_text(json.dumps({"best_epoch": 30, "best_val_loss": 0.76}))
+    _, selected, _ = verify_best_checkpoint(checkpoint_path, summary_path, expected_epoch=30)
+    assert selected["epoch"] == 30
 
 
 def test_prediction_shape_and_class_mapping() -> None:

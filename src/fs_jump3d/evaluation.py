@@ -82,11 +82,12 @@ def validate_test_split(
         raise ValueError("unexpected test class distribution")
 
 
-def verify_best_checkpoint(checkpoint_path: Path, training_summary_path: Path) -> tuple[torch.nn.Module, dict, PreprocessConfig]:
+def verify_best_checkpoint(checkpoint_path: Path, training_summary_path: Path,
+                           expected_epoch: int = 19) -> tuple[torch.nn.Module, dict, PreprocessConfig]:
     model, checkpoint = load_checkpoint(checkpoint_path, "cpu")
     summary = json.loads(Path(training_summary_path).read_text())
-    if checkpoint["epoch"] != summary["best_epoch"] or checkpoint["epoch"] != 19:
-        raise ValueError("checkpoint is not the Milestone 4 validation-selected epoch 19 model")
+    if checkpoint["epoch"] != summary["best_epoch"] or checkpoint["epoch"] != expected_epoch:
+        raise ValueError(f"checkpoint is not the validation-selected epoch {expected_epoch} model")
     if not np.isclose(checkpoint["val_loss"], summary["best_val_loss"]):
         raise ValueError("checkpoint validation loss differs from the training record")
     if checkpoint["label_mapping"] != list(TARGET_CLASSES):
