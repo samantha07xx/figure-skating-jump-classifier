@@ -1,0 +1,23 @@
+{
+  "device": "mps",
+  "parameter_count": 395222,
+  "epochs_trained": 30,
+  "best_epoch": 29,
+  "best_val_loss": 0.7340557428973692,
+  "best_val_accuracy": 0.6875,
+  "best_val_macro_f1": 0.6867307000828621,
+  "early_stopping_triggered": false,
+  "runtime_seconds": 1286.2509043750179,
+  "final_epoch": {
+    "epoch": 30,
+    "train_loss": 0.6851948697770399,
+    "train_accuracy": 0.7028769841269841,
+    "train_macro_f1": 0.7017421680449152,
+    "val_loss": 0.7718445189573147,
+    "val_accuracy": 0.6736111111111112,
+    "val_macro_f1": 0.6692374816183079,
+    "learning_rate": 2.5e-05,
+    "elapsed_seconds": 42.93161829098244
+  },
+  "smoke": false
+}

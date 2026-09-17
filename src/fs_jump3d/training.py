@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import yaml
+from sklearn.metrics import f1_score
 
 from fs_jump3d.dataset import TARGET_CLASSES
 from fs_jump3d.model import CNNBiLSTM, ModelConfig, parameter_count
@@ -73,11 +74,13 @@ def load_checkpoint(path: Path, device: str | torch.device = "cpu") -> tuple[CNN
 
 
 def run_epoch(model: CNNBiLSTM, loader, criterion, device: torch.device,
-              optimizer: torch.optim.Optimizer | None = None) -> tuple[float, float]:
+              optimizer: torch.optim.Optimizer | None = None) -> tuple[float, float, float]:
     model.train(optimizer is not None)
     total_loss = 0.0
     correct = 0
     count = 0
+    truths = []
+    predictions = []
     for videos, labels, _ in loader:
         videos = videos.to(device)
         labels = labels.to(device)
@@ -96,8 +99,31 @@ def run_epoch(model: CNNBiLSTM, loader, criterion, device: torch.device,
         batch_size = labels.size(0)
         total_loss += float(loss.detach()) * batch_size
         correct += int((logits.argmax(dim=1) == labels).sum())
+        truths.extend(labels.cpu().tolist())
+        predictions.extend(logits.argmax(dim=1).cpu().tolist())
         count += batch_size
-    return total_loss / count, correct / count
+    return total_loss / count, correct / count, float(f1_score(truths, predictions, labels=range(len(TARGET_CLASSES)), average="macro", zero_division=0))
+
+
+def build_optimizer(model: CNNBiLSTM, config: dict[str, object]) -> torch.optim.Optimizer:
+    name = str(config.get("optimizer", "Adam"))
+    lr = float(config["learning_rate"])
+    if name == "Adam":
+        return torch.optim.Adam(model.parameters(), lr=lr)
+    if name == "AdamW":
+        return torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=float(config.get("weight_decay", 0.0)))
+    raise ValueError(f"unsupported optimizer: {name}")
+
+
+def build_scheduler(optimizer: torch.optim.Optimizer, config: dict[str, object]):
+    name = config.get("scheduler", "none")
+    if name == "none":
+        return None
+    if name == "plateau":
+        return torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=float(config.get("scheduler_factor", 0.5)),
+            patience=int(config.get("scheduler_patience", 2)), min_lr=1e-6)
+    raise ValueError(f"unsupported scheduler: {name}")
 
 
 def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
@@ -105,11 +131,14 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
     device = select_device(str(config["device"]))
     preprocess = PreprocessConfig(int(config["frames_per_clip"]), int(config["image_size"]))
     model = CNNBiLSTM(ModelConfig(num_classes=int(config["num_classes"]), **config["model"])).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=float(config["learning_rate"]))
+    optimizer = build_optimizer(model, config)
+    scheduler = build_scheduler(optimizer, config)
     criterion = torch.nn.CrossEntropyLoss()
     run_dir = Path(config["run_dir"])
     if smoke:
         run_dir = run_dir / "smoke"
+    if (run_dir / "summary.json").exists():
+        raise FileExistsError(f"run directory already contains a training summary: {run_dir}")
     run_dir.mkdir(parents=True, exist_ok=True)
     resolved = {**config, "actual_device": str(device), "parameter_count": parameter_count(model), "smoke": smoke}
     (run_dir / "resolved_config.yaml").write_text(yaml.safe_dump(resolved, sort_keys=False))
@@ -118,6 +147,7 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
         int(config["batch_size"]), int(config["num_workers"]), int(config["seed"]),
         max_samples=4 if smoke else None,
         cache_dir=Path(config["cache_dir"]) if config.get("cache_dir") else None,
+        augment_train=bool(config.get("augment_train", False)),
     )
     history = []
     best_loss = float("inf")
@@ -128,11 +158,12 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
     epochs = 1 if smoke else int(config["epochs"])
     for epoch in range(1, epochs + 1):
         epoch_start = time.monotonic()
-        train_loss, train_accuracy = run_epoch(model, train_loader, criterion, device, optimizer)
-        val_loss, val_accuracy = run_epoch(model, val_loader, criterion, device)
+        current_lr = optimizer.param_groups[0]["lr"]
+        train_loss, train_accuracy, train_f1 = run_epoch(model, train_loader, criterion, device, optimizer)
+        val_loss, val_accuracy, val_f1 = run_epoch(model, val_loader, criterion, device)
         row = {"epoch": epoch, "train_loss": train_loss, "train_accuracy": train_accuracy,
-               "val_loss": val_loss, "val_accuracy": val_accuracy,
-               "learning_rate": optimizer.param_groups[0]["lr"],
+               "train_macro_f1": train_f1, "val_loss": val_loss, "val_accuracy": val_accuracy,
+               "val_macro_f1": val_f1, "learning_rate": current_lr,
                "elapsed_seconds": time.monotonic() - epoch_start}
         history.append(row)
         with (run_dir / "history.csv").open("w", newline="") as file:
@@ -144,9 +175,12 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
             save_checkpoint(run_dir / "best_model.pt", model, optimizer, epoch, val_loss, val_accuracy, preprocess)
         else:
             stale += 1
+        if scheduler is not None:
+            scheduler.step(val_loss)
         summary = {"device": str(device), "parameter_count": parameter_count(model),
                    "epochs_trained": epoch, "best_epoch": best_epoch,
                    "best_val_loss": best_loss, "best_val_accuracy": best_accuracy,
+                   "best_val_macro_f1": history[best_epoch - 1]["val_macro_f1"],
                    "early_stopping_triggered": stale >= int(config["early_stopping_patience"]),
                    "runtime_seconds": time.monotonic() - start, "final_epoch": row,
                    "smoke": smoke}

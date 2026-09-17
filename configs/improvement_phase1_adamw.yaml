@@ -1,0 +1,25 @@
+seed: 42
+num_classes: 6
+frames_per_clip: 32
+image_size: 224
+batch_size: 4
+epochs: 30
+learning_rate: 0.0001
+optimizer: AdamW
+weight_decay: 0.0001
+loss: CrossEntropyLoss
+early_stopping_patience: 5
+num_workers: 2
+device: auto
+split_csv: data/splits/dataset_split.csv
+data_root: data/raw/fs-jump3d
+cache_dir: data/processed/frame_cache
+run_dir: models/runs/improvement_phase1/adamw
+augment_train: false
+scheduler: none
+model:
+  feature_dim: 128
+  lstm_hidden_size: 128
+  lstm_layers: 1
+  dropout: 0.3
+  frame_chunk_size: 128

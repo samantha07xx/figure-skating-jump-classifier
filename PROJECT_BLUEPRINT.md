@@ -890,3 +890,7 @@ The full MVP is done when:
 - tests cover critical parser, split, preprocessing, model, and inference behavior
 - README and blueprint accurately describe scope, limitations, and how to run the project
 - no ZIP, MP4, extracted dataset, uploaded videos, model weights, or large binary artifacts are tracked by Git
+
+## 30. Post-MVP Model Improvement Phase 1
+
+Phase 1 compared four small, controlled training candidates against the unchanged Milestone 4 baseline on the established train/validation split only. The detailed diagnosis, exact configurations, validation metrics, per-class findings, and checkpoint selection are in `data/experiments/improvement_phase1/comparison.md`. Conservative clip-consistent augmentation is the provisional validation winner (70.37% accuracy, 0.701 macro F1, 0.7616 loss at epoch 30), but validation remains volatile and Toeloop F1 worsened. AdamW at 1e-4 weight decay produced the baseline trajectory; a validation-loss scheduler lowered loss but not selected-checkpoint macro F1 as much as augmentation; the combined scheduler never activated and reproduced augmentation exactly. No Phase 1 checkpoint replaced the fixed production model, and no Phase 1 candidate was evaluated on the held-out test set. Further testing or model changes require a separate decision.

@@ -4,6 +4,8 @@ End-to-end PyTorch project for classifying already-trimmed single-jump figure sk
 
 Milestones 1-7 are complete: audit, leakage-aware split, OpenCV preprocessing, CNN-BiLSTM training, held-out evaluation, single-video inference, and a local web MVP.
 
+Post-MVP Phase 1 used train/validation only to compare conservative augmentation, AdamW weight decay, a validation-loss LR scheduler, and their limited combination. See [the validation-only experiment report](data/experiments/improvement_phase1/comparison.md). The augmentation run is a provisional validation winner, not the web model; the fixed production checkpoint and published held-out result below have not changed.
+
 ## Run the Web MVP
 
 From the repository root:

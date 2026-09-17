@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import cv2
 from torch.utils.data import DataLoader, Dataset
 
 from fs_jump3d.dataset import TARGET_CLASSES
@@ -12,6 +13,23 @@ from fs_jump3d.preprocessing import PreprocessConfig, preprocess_video_streaming
 
 
 LABEL_TO_INDEX = {label: index for index, label in enumerate(TARGET_CLASSES)}
+
+
+def augment_clip(frames: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    """Apply one mild spatial/photometric transform to the whole clip."""
+    _, _, height, width = frames.shape
+    dx = int(rng.integers(-8, 9))
+    dy = int(rng.integers(-8, 9))
+    gain = float(rng.uniform(0.9, 1.1))
+    bias = float(rng.uniform(-0.04, 0.04))
+    matrix = np.float32([[1, 0, dx], [0, 1, dy]])
+    output = np.empty_like(frames)
+    for index, frame in enumerate(frames):
+        image = np.moveaxis(frame, 0, -1)
+        moved = cv2.warpAffine(image, matrix, (width, height), flags=cv2.INTER_LINEAR,
+                               borderMode=cv2.BORDER_REFLECT_101)
+        output[index] = np.moveaxis(np.clip(moved * gain + bias, 0, 1), -1, 0)
+    return output
 
 
 class SplitVideoDataset(Dataset):
@@ -23,12 +41,16 @@ class SplitVideoDataset(Dataset):
         preprocess_config: PreprocessConfig | None = None,
         max_samples: int | None = None,
         cache_dir: Path | None = None,
+        augment: bool = False,
     ) -> None:
         if split not in ("train", "val"):
             raise ValueError("training datasets permit only train or val")
         self.data_root = Path(data_root)
         self.preprocess_config = preprocess_config or PreprocessConfig()
         self.cache_dir = Path(cache_dir) if cache_dir is not None else None
+        if augment and split != "train":
+            raise ValueError("augmentation is allowed only for training")
+        self.augment = augment
         with Path(split_csv).open(newline="") as file:
             rows = list(csv.DictReader(file))
         if any(row["split"] not in ("train", "val", "test") for row in rows):
@@ -59,6 +81,8 @@ class SplitVideoDataset(Dataset):
                 temporary = cache_path.with_suffix(".tmp.npy")
                 np.save(temporary, np.rint(frames * 255.0).astype(np.uint8))
                 temporary.replace(cache_path)
+        if self.augment:
+            frames = augment_clip(frames, np.random.default_rng(np.random.randint(0, 2**32)))
         return torch.from_numpy(frames), LABEL_TO_INDEX[row["jump_type"]], row["filepath"]
 
 
@@ -71,8 +95,10 @@ def make_loaders(
     seed: int,
     max_samples: int | None = None,
     cache_dir: Path | None = None,
+    augment_train: bool = False,
 ) -> tuple[DataLoader, DataLoader]:
-    train = SplitVideoDataset(split_csv, data_root, "train", preprocess_config, max_samples, cache_dir)
+    train = SplitVideoDataset(split_csv, data_root, "train", preprocess_config, max_samples, cache_dir,
+                              augment=augment_train)
     val = SplitVideoDataset(split_csv, data_root, "val", preprocess_config, max_samples, cache_dir)
     generator = torch.Generator().manual_seed(seed)
     return (
