@@ -1,4 +1,4 @@
-checkpoint: models/runs/milestone4/best_model.pt
-expected_sha256: 31d6fbba519b628798b225c9276c895fdeb318312a2afe8598ac3b406dacdefe
-expected_epoch: 19
+checkpoint: models/runs/improvement_phase1/augmentation/best_model.pt
+expected_sha256: 8ab4aaa77dc4df660148bcedb35ebae3a520515571e01d5e93edc82f3290b8ce
+expected_epoch: 30
 device: auto

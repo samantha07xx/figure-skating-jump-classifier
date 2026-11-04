@@ -32,9 +32,14 @@ main { max-width: 1008px; margin: auto; padding: 48px 24px 64px; }
 .heading p { color: #52616c; margin: 0; font-size: 15px; line-height: 1.65; max-width: 660px; }
 .supported-classes { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 20px 0 0; padding: 0; }
 .supported-classes li { border: 1px solid #dce5e8; border-radius: 5px; padding: 5px 10px; color: #60717d; font-size: 12px; line-height: 1.4; }
-.workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; align-items: start; }
-.workspace:has(.result:not([hidden])) { grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr); }
-.input-pane, .result { background: #fff; border: 1px solid #dce5e8; border-radius: 10px; padding: 24px; min-width: 0; }
+.workspace { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr); gap: 22px; align-items: start; }
+.input-pane, .result-panel { background: #fff; border: 1px solid #dce5e8; border-radius: 10px; padding: 24px; min-width: 0; }
+.result-panel { min-height: 460px; }
+.empty-state { min-height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px 10px; }
+.empty-icon { color: #00777a; background: #dff1f0; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; }
+.empty-state h2 { margin: 20px 0 8px; font-size: 17px; font-weight: 600; }
+.empty-state p { max-width: 28ch; margin: 0; font-size: 13px; line-height: 1.7; color: #60717d; }
+.result-panel:has(#result:not([hidden])) .empty-state { display: none; }
 .pane-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .pane-heading h2 { margin: 0; font-size: 15px; font-weight: 650; }
 .pane-heading span { color: #61727d; font-size: 12px; }
@@ -93,8 +98,10 @@ button:disabled { opacity: .5; cursor: not-allowed; }
   main { padding: 30px 18px 40px; }
   .topbar { padding: 16px 18px; font-size: 13px; min-height: 60px; }
   .heading { margin-bottom: 24px; }
-  .workspace:has(.result:not([hidden])), .model-info-grid { grid-template-columns: 1fr; }
-  .input-pane, .result { padding: 18px; }
+  .workspace, .model-info-grid { grid-template-columns: 1fr; }
+  .input-pane, .result-panel { padding: 18px; }
+  .result-panel { min-height: 0; }
+  .empty-state { min-height: 200px; }
   .dropzone { min-height: 200px; padding: 18px; }
   .summary-hint { display: none; }
 }

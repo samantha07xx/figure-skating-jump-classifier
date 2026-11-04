@@ -193,5 +193,6 @@ prove historical execution order.
 .venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
 ```
 
-The existing web configuration and production checkpoint remain unchanged.
+The web demo now uses the evaluated augmentation checkpoint (epoch 30), pinned
+by SHA-256 in `configs/inference.yaml`. The baseline remains available separately.
 New research runs do not automatically replace the deployed model.

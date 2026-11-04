@@ -99,7 +99,7 @@ class VideoPredictor:
         except OSError as exc:
             raise CheckpointError(f"cannot read checkpoint: {exc}") from exc
         if digest != expected_sha256:
-            raise CheckpointError("checkpoint SHA-256 does not match the fixed Milestone 4 model")
+            raise CheckpointError("checkpoint SHA-256 does not match the configured model")
         try:
             model, metadata = load_checkpoint(checkpoint_path, "cpu")
             required = ("epoch", "label_mapping", "model_config", "preprocessing_config", "model_state_dict")

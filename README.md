@@ -58,7 +58,7 @@ Each run saves its configuration, training history, selected checkpoint, source 
 
 ## Inference demo
 
-The web demo uses the baseline checkpoint specified in `configs/inference.yaml`; the augmentation checkpoint is preserved separately. Place the matching checkpoint at the configured path before starting the server.
+The web demo uses the evaluated augmentation checkpoint specified in `configs/inference.yaml`; the baseline checkpoint is preserved separately. Place the matching checkpoint at the configured path before starting the server.
 
 ```bash
 .venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000

@@ -11,9 +11,17 @@ let selected = null;
 let previewUrl = null;
 let maxUploadBytes = 100 * 1024 * 1024;
 fetch('/config').then(response => response.json()).then(data => { maxUploadBytes = data.max_upload_bytes; }).catch(() => {});
-function showError(message) { error.textContent = message; error.hidden = false; status.textContent = ''; }
+function setPlaceholder(title, description) {
+  document.getElementById('empty-title').textContent = title;
+  document.getElementById('empty-description').textContent = description;
+}
+function showError(message) {
+  error.textContent = message; error.hidden = false; status.textContent = '';
+  setPlaceholder('No result yet', 'Check the message beside your video, then try again.');
+}
 function selectFile(file) {
   selected = null; result.hidden = true; error.hidden = true;
+  setPlaceholder('Ready when you are', 'Choose a jump video and select Analyze jump. The predicted class and probabilities will appear here.');
   if (previewUrl) URL.revokeObjectURL(previewUrl);
   preview.hidden = true; button.disabled = true;
   if (!file) { document.getElementById('file-name').textContent = 'No video selected'; return; }
@@ -30,6 +38,7 @@ dropzone.addEventListener('drop', event => selectFile(event.dataTransfer.files[0
 button.addEventListener('click', async () => {
   if (!selected) { showError('Choose one MP4 video first.'); return; }
   button.disabled = true; result.hidden = true; error.hidden = true; status.textContent = 'Analyzing video…';
+  setPlaceholder('Analyzing your jump', 'Processing the video. Your prediction will appear here when the analysis is complete.');
   try {
     const form = new FormData(); form.append('video', selected);
     const response = await fetch('/predict', { method: 'POST', body: form });
