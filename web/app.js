@@ -9,6 +9,8 @@ const probabilities = document.getElementById('probabilities');
 const labels = ['Axel', 'Flip', 'Loop', 'Lutz', 'Salchow', 'Toeloop'];
 let selected = null;
 let previewUrl = null;
+let selectionRevision = 0;
+let pendingRequest = null;
 let maxUploadBytes = 100 * 1024 * 1024;
 fetch('/config').then(response => response.json()).then(data => { maxUploadBytes = data.max_upload_bytes; }).catch(() => {});
 function setPlaceholder(title, description) {
@@ -20,6 +22,11 @@ function showError(message) {
   setPlaceholder('No result yet', 'Check the message beside your video, then try again.');
 }
 function selectFile(file) {
+  selectionRevision += 1;
+  if (pendingRequest) pendingRequest.abort();
+  pendingRequest = null;
+  status.textContent = '';
+  document.getElementById('file-name').textContent = 'No video selected';
   selected = null; result.hidden = true; error.hidden = true;
   setPlaceholder('Ready when you are', 'Choose a jump video and select Analyze jump. The predicted class and probabilities will appear here.');
   if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -37,12 +44,16 @@ input.addEventListener('change', () => selectFile(input.files[0]));
 dropzone.addEventListener('drop', event => selectFile(event.dataTransfer.files[0]));
 button.addEventListener('click', async () => {
   if (!selected) { showError('Choose one MP4 video first.'); return; }
+  const revision = selectionRevision;
+  const controller = new AbortController();
+  pendingRequest = controller;
   button.disabled = true; result.hidden = true; error.hidden = true; status.textContent = 'Analyzing video…';
   setPlaceholder('Analyzing your jump', 'Processing the video. Your prediction will appear here when the analysis is complete.');
   try {
     const form = new FormData(); form.append('video', selected);
-    const response = await fetch('/predict', { method: 'POST', body: form });
+    const response = await fetch('/predict', { method: 'POST', body: form, signal: controller.signal });
     const data = await response.json();
+    if (revision !== selectionRevision) return;
     if (!response.ok) throw new Error(typeof data.detail === 'string' ? data.detail : 'Prediction failed. Please try another MP4.');
     if (!labels.includes(data.predicted_label)) throw new Error('The server returned an invalid prediction.');
     document.getElementById('predicted-label').textContent = data.predicted_label === 'Toeloop' ? 'Toe Loop' : data.predicted_label;
@@ -59,6 +70,12 @@ button.addEventListener('click', async () => {
       row.append(name, track, percent); probabilities.append(row);
     }
     result.hidden = false; status.textContent = 'Analysis complete';
-  } catch (exc) { showError(exc.message || 'Network error. Check that the app is running.'); }
-  finally { button.disabled = false; }
+  } catch (exc) {
+    if (revision === selectionRevision && !controller.signal.aborted) {
+      showError(exc.message || 'Network error. Check that the app is running.');
+    }
+  } finally {
+    if (revision === selectionRevision) button.disabled = !selected;
+    if (pendingRequest === controller) pendingRequest = null;
+  }
 });

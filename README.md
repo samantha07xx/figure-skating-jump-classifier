@@ -56,6 +56,17 @@ Train into a new directory for each run:
 
 Each run saves its configuration, training history, selected checkpoint, source snapshot, environment metadata, and input/result fingerprints.
 
+To evaluate the **existing augmentation checkpoint reported above**, after obtaining
+the videos and installing the matching weights:
+
+```bash
+.venv/bin/python scripts/evaluate.py --checkpoint models/runs/improvement_phase1/augmentation/best_model.pt --training-summary data/experiments/improvement_phase1/augmentation_summary.json --expected-epoch 30 --output-dir data/reproduction/augmentation_test
+```
+
+Use a new output directory. For a newly trained run, supply that run's checkpoint,
+`summary.json`, and its recorded `best_epoch` instead. Running `evaluate.py` without
+arguments selects the historical baseline, not the current demo model.
+
 ## Inference demo
 
 The web demo uses the evaluated augmentation checkpoint specified in `configs/inference.yaml`; the baseline checkpoint is preserved separately. Place the matching checkpoint at the configured path before starting the server.
