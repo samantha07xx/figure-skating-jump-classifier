@@ -94,12 +94,15 @@ def _git(*args: str) -> str | None:
 def capture_run(output_dir: Path, *, split_csv: Path, data_root: Path,
                 config: dict, cache_dir: Path | None = None,
                 checkpoints: tuple[Path, ...] = (),
-                partitions: tuple[str, ...] = ("train", "val", "test")) -> Path:
+                partitions: tuple[str, ...] = ("train", "val", "test"),
+                record_kind: str = "snapshot") -> Path:
     """Record exact input bytes and source files before execution.
 
     Hashing is read-only. Existing caches are recorded, never invalidated or
     regenerated here. Missing caches are recorded as cold-cache inputs.
     """
+    if record_kind not in ("snapshot", "experiment"):
+        raise ValueError("record_kind must be snapshot or experiment")
     rows = validate_split_file(split_csv)
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -107,11 +110,11 @@ def capture_run(output_dir: Path, *, split_csv: Path, data_root: Path,
     if manifest_path.exists():
         raise FileExistsError(f"refusing to replace provenance: {manifest_path}")
     sources = []
-    for directory in ("src", "scripts", "configs", "tests", "web", "docs", "environments"):
+    for directory in ("src", "scripts", "configs", "tests", "web", "docs", "environments", ".github"):
         sources.extend(p for p in (PROJECT_ROOT / directory).rglob("*")
                        if p.is_file() and "__pycache__" not in p.parts)
     sources.extend(PROJECT_ROOT / name for name in
-                   ("README.md", "PROJECT_BLUEPRINT.md", "requirements.txt", "pyproject.toml", ".gitignore")
+                   ("README.md", "PROJECT_BLUEPRINT.md", "requirements.txt", "pyproject.toml", ".gitignore", "LICENSE", "CITATION.cff")
                    if (PROJECT_ROOT / name).is_file())
     source_records = []
     for source in sorted(sources):
@@ -138,7 +141,8 @@ def capture_run(output_dir: Path, *, split_csv: Path, data_root: Path,
             else:
                 missing_cache.append(str(cache.resolve()))
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
+        "record_kind": record_kind,
         "captured_at_utc": datetime.now(timezone.utc).isoformat(),
         "project_root_at_capture": str(PROJECT_ROOT),
         "command": sys.argv,
@@ -162,10 +166,17 @@ def capture_run(output_dir: Path, *, split_csv: Path, data_root: Path,
     return manifest_path
 
 
-def verify_manifest(manifest_path: Path, root: Path = PROJECT_ROOT) -> list[str]:
+def verify_manifest(manifest_path: Path, root: Path = PROJECT_ROOT, *, check_environment: bool = True) -> list[str]:
     """Verify available input/source bytes; report every mismatch."""
     manifest = json.loads(Path(manifest_path).read_text())
     errors = []
+    if manifest.get("record_kind") not in ("snapshot", "experiment"):
+        errors.append("legacy/unknown record kind: recapture to distinguish snapshots from completed experiments")
+    if check_environment:
+        current = environment_record()
+        for key, value in manifest["environment"].items():
+            if current.get(key) != value:
+                errors.append(f"environment mismatch: {key}")
     records = manifest["sources"] + manifest["inputs"] + manifest["existing_caches"]
     outputs_path = Path(manifest_path).parent / "outputs.json"
     if outputs_path.exists():
@@ -173,6 +184,10 @@ def verify_manifest(manifest_path: Path, root: Path = PROJECT_ROOT) -> list[str]
         if outputs["manifest_sha256"] != sha256_file(manifest_path):
             errors.append("changed: provenance manifest")
         records += outputs["outputs"]
+        if not outputs["outputs"]:
+            errors.append("empty experiment output record")
+    elif manifest.get("record_kind") == "experiment":
+        errors.append("incomplete experiment: missing outputs.json")
     for record in records:
         path = Path(root) / record["path"]
         if not path.is_file():
@@ -192,6 +207,12 @@ def verify_manifest(manifest_path: Path, root: Path = PROJECT_ROOT) -> list[str]
 def seal_outputs(output_dir: Path, paths: list[Path]) -> None:
     """Link completed result bytes to their input manifest."""
     output_dir = Path(output_dir)
+    if not paths:
+        raise ValueError("cannot seal an experiment without outputs")
+    manifest_path = output_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["record_kind"] = "experiment"
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
     record = {"manifest_sha256": sha256_file(output_dir / "manifest.json"),
               "outputs": [file_record(path) for path in paths]}
     (output_dir / "outputs.json").write_text(json.dumps(record, indent=2, sort_keys=True) + "\n")

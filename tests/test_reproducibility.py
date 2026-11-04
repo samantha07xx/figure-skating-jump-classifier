@@ -100,3 +100,21 @@ def test_training_record_does_not_change_optimization(tmp_path, monkeypatch):
     right = torch.load(tmp_path / "control/best_model.pt", weights_only=False)
     for key in left["model_state_dict"]:
         assert torch.equal(left["model_state_dict"][key], right["model_state_dict"][key])
+
+
+def test_incomplete_runs_and_environment_drift_fail(tmp_path, monkeypatch):
+    import fs_jump3d.reproducibility as repro
+    split_csv, _ = make_inputs(tmp_path)
+    manifest = capture_run(tmp_path / 'run', split_csv=split_csv, data_root=tmp_path,
+                           config={}, record_kind='experiment')
+    assert 'incomplete experiment: missing outputs.json' in verify_manifest(manifest)
+    output = tmp_path / 'result.json'
+    output.write_text('{}')
+    seal_outputs(manifest.parent, [output])
+    assert verify_manifest(manifest) == []
+    original = repro.environment_record()
+    monkeypatch.setattr(repro, 'environment_record', lambda: {**original, 'torch': 'different'})
+    assert 'environment mismatch: torch' in verify_manifest(manifest)
+    assert verify_manifest(manifest, check_environment=False) == []
+    (manifest.parent / 'outputs.json').unlink()
+    assert 'incomplete experiment: missing outputs.json' in verify_manifest(manifest)

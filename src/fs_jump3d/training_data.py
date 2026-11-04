@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from fs_jump3d.dataset import TARGET_CLASSES
 from fs_jump3d.preprocessing import PreprocessConfig, preprocess_video_streaming
+from fs_jump3d.frame_cache import cached_frames
 
 
 LABEL_TO_INDEX = {label: index for index, label in enumerate(TARGET_CLASSES)}
@@ -73,14 +74,7 @@ class SplitVideoDataset(Dataset):
             frames = preprocess_video_streaming(video_path, self.preprocess_config).frames
         else:
             cache_path = self.cache_dir / f"{self.preprocess_config.frames_per_clip}x{self.preprocess_config.image_size}" / Path(row["filepath"]).with_suffix(".npy")
-            if cache_path.exists():
-                frames = np.load(cache_path).astype(np.float32) / 255.0
-            else:
-                frames = preprocess_video_streaming(video_path, self.preprocess_config).frames
-                cache_path.parent.mkdir(parents=True, exist_ok=True)
-                temporary = cache_path.with_suffix(".tmp.npy")
-                np.save(temporary, np.rint(frames * 255.0).astype(np.uint8))
-                temporary.replace(cache_path)
+            frames = cached_frames(video_path, cache_path, self.preprocess_config)
         if self.augment:
             frames = augment_clip(frames, np.random.default_rng(np.random.randint(0, 2**32)))
         return torch.from_numpy(frames), LABEL_TO_INDEX[row["jump_type"]], row["filepath"]

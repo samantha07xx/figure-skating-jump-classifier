@@ -84,3 +84,23 @@ For command-line prediction using the same checkpoint:
 | `web/` | Web demo interface |
 | `docs/` | Reproduction instructions |
 | `environments/` | Dependency snapshot |
+
+## Further work
+
+The following experiments are proposed; they are not established improvements:
+
+- **Training stability:** repeat the baseline and augmentation experiments with several training seeds on the fixed split, reporting mean and standard deviation of validation metrics.
+- **Temporal representation:** compare the current uniformly sampled sequence with temporal sampling strategies and a frame-only baseline to measure the contribution of sequence modeling.
+- **Visual features:** evaluate a pretrained frame encoder and skater-centered crops, keeping the split and evaluation protocol fixed and reporting the added training cost.
+- **Class confusion:** investigate Salchow–Toe Loop and Axel–Lutz errors on validation data, separating effects of camera view, framing, and jump phase before introducing targeted augmentation.
+- **Generalization:** add a separate leave-one-skater-out protocol to measure performance on skaters absent from training. Report these results separately from the existing attempt-held-out split.
+
+Use validation data for model development and reserve held-out evaluation for a finalized protocol. The current test set has already been inspected; further test-informed changes require a new independent evaluation design. Confidence intervals should account for camera views belonging to the same physical attempt.
+
+## Data and references
+
+Dataset access, checkpoint availability, and installation are documented in
+[Data and model artifacts](docs/DATA_AND_MODELS.md). See [CITATION.cff](CITATION.cff)
+for repository citation metadata and cite the original FS-Jump3D paper when using
+the dataset. Reproduction instructions and verified environment checks are in the
+[reproducibility guide](docs/REPRODUCIBILITY.md) and [validation record](docs/VALIDATION.md).

@@ -37,7 +37,7 @@ def main() -> None:
     device = select_device(args.device)
     model = model.to(device).eval()
     capture_run(provenance_dir, split_csv=args.split_csv, data_root=args.data_root,
-                cache_dir=args.cache_dir, checkpoints=(args.checkpoint,), partitions=("val",),
+                cache_dir=args.cache_dir, checkpoints=(args.checkpoint,), partitions=("val",), record_kind="experiment",
                 config={**{key: str(value) if isinstance(value, Path) else value
                            for key, value in vars(args).items()},
                         **metadata["preprocessing_config"], "actual_device": str(device)})

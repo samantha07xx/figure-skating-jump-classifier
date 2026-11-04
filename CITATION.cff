@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use this code, cite this repository and the FS-Jump3D dataset paper listed in docs/DATA_AND_MODELS.md."
+title: "Figure Skating Jump Recognition"
+type: software
+authors:
+  - name: "Samantha (samantha07xx)"
+repository-code: "https://github.com/samantha07xx/figure-skating-jump-classifier"
+url: "https://github.com/samantha07xx/figure-skating-jump-classifier"

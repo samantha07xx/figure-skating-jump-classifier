@@ -23,13 +23,14 @@ def main() -> None:
     verify = command.add_parser("verify")
     verify.add_argument("manifest", type=Path)
     verify.add_argument("--root", type=Path, default=ROOT)
+    verify.add_argument("--files-only", action="store_true", help="Explicitly skip environment comparison")
     args = parser.parse_args()
     if args.command == "verify":
-        errors = verify_manifest(args.manifest, args.root)
+        errors = verify_manifest(args.manifest, args.root, check_environment=not args.files_only)
         if errors:
             print("\n".join(errors))
             raise SystemExit(1)
-        print("All recorded source, data, cache, snapshot and available result fingerprints match.")
+        print("Recorded files match." if args.files_only else "Recorded files and environment match.")
     else:
         config = load_config(args.config, ROOT)
         manifest = capture_run(args.output_dir, split_csv=Path(config["split_csv"]),

@@ -14,8 +14,7 @@ Run commands from the repository root. The existing `.venv` remains untouched.
 `environments/requirements-current.txt` pins the installed packages observed during
 this organization update. Its header records Python and platform. It is an
 environment snapshot, **not evidence of the original training environment** and
-not a tested cross-platform dependency lock. Package availability on a fresh
-machine has not been verified. Preserve wheel files separately for long-term
+not a tested cross-platform dependency lock. The pinned packages were installed successfully in a clean local Python 3.13 environment on macOS arm64 on 2026-11-04. Other platforms have not been verified. Preserve wheel files separately for long-term
 offline reproduction.
 
 To recreate that snapshot on a compatible Python/platform in a new environment:
@@ -112,18 +111,18 @@ unchanged while it runs. Do not run multiple writers against the same cache.
 
 ### Cache and numerical behavior
 
-For compatibility, the existing uint8 frame cache format and lookup behavior are
-preserved. A manifest identifies the exact cache files used; it does not certify
-that an old cache was generated from the currently supplied raw videos.
-If videos or preprocessing change, select a **new `cache_dir` in a copied training
-config**. Keep the original cache for historical reproduction. Do not silently
-reuse it for a different dataset.
+The existing uint8 frame cache format is preserved. Each cache now has a
+`.npy.json` sidecar binding it to source video SHA-256, preprocessing/cache code,
+OpenCV/NumPy versions, shape configuration and cache bytes. Changed inputs or
+metadata cause an explicit error; choose a new cache directory for a new pipeline.
+Existing caches without sidecars are decoded once and adopted only when their
+tensors exactly match the current preprocessing. No historical arrays are silently
+rewritten. This validation adds decoding on first legacy access and hashing on
+subsequent reads. Do not run multiple writers against the same cache.
 
-To reproduce a recorded warm-cache run, retain the matching recorded caches.
-For a cold-cache run, use a fresh cache directory and consult
-`missing_caches_at_start`. Existing files are hashed; absent files cannot be
-verified after generation as if they had existed initially. Hashing adds no
-cache invalidation or decoding changes.
+Reproduction manifests record the caches present before execution. Files generated
+later are not represented as pre-existing inputs; their validation sidecars are
+checked by the dataset loader when they are used.
 
 Seeds are fixed as before. Deterministic backend algorithms are not forcibly
 enabled because that can change supported operations, performance and numerical
@@ -173,7 +172,7 @@ and reported scores are not rewritten by this update.
 .venv/bin/python scripts/reproducibility.py verify models/runs/reproduction/baseline/provenance/manifest.json
 ```
 
-Verification exits nonzero and lists changed/missing files. A later code edit
+Verification exits nonzero and lists changed/missing files and environment differences. Schema v2 distinguishes input-only snapshots from experiments; experiment records require a nonempty outputs.json seal. Interrupted experiments fail verification. Use --files-only explicitly to skip environment comparison (for example, when inspecting files on another device). Legacy v1 manifests lack a record kind and need recapture; they are not silently treated as complete runs. A later code edit
 correctly causes the source comparison to fail; restore/use the archived `source/`
 when reproducing that run. `--root` relocates project-relative records to a new
 checkout. Inputs outside the repository retain absolute paths and must be restored

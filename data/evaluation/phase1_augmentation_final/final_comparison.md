@@ -1,5 +1,7 @@
 # One-Time Phase 1 Held-Out Evaluation
 
+Deployment note (2026-11-04): deployment references below describe the evaluation-time state. The demo now serves this augmentation checkpoint; see [deployment history](../../../docs/DATA_AND_MODELS.md#historical-reports-and-deployment). Original experimental results are unchanged.
+
 The Phase 1 validation-selected **augmentation-only** checkpoint was evaluated once on the unchanged FS-Jump3D grouped test split with the Milestone 5 protocol. No retraining, tuning, split changes, or other Phase 1 checkpoints were evaluated on test. This result did not change the production web model.
 
 - Checkpoint: `models/runs/improvement_phase1/augmentation/best_model.pt`

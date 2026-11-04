@@ -48,7 +48,7 @@ def main() -> None:
                 data_root=args.data_root,
                 config={**{key: str(value) if isinstance(value, Path) else value
                            for key, value in vars(args).items()}, "actual_device": str(device)},
-                checkpoints=(args.checkpoint, args.training_summary), partitions=("test",))
+                checkpoints=(args.checkpoint, args.training_summary), partitions=("test",), record_kind="experiment")
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     predictions = predict_test_videos(model, loader, device)
     if len(predictions) != len(dataset) or {row["filepath"] for row in predictions} != {row["filepath"] for row in dataset.rows}:

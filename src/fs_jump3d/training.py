@@ -150,7 +150,7 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
     capture_run(run_dir / "provenance", split_csv=Path(config["split_csv"]),
                 data_root=Path(config["data_root"]), config=resolved,
                 cache_dir=Path(config["cache_dir"]) if config.get("cache_dir") else None,
-                partitions=("train", "val"))
+                partitions=("train", "val"), record_kind="experiment")
     train_loader, val_loader = make_loaders(
         Path(config["split_csv"]), Path(config["data_root"]), preprocess,
         int(config["batch_size"]), int(config["num_workers"]), int(config["seed"]),
