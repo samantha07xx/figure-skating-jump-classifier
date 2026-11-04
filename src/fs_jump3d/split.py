@@ -294,7 +294,7 @@ def write_summary_markdown(summary: dict[str, object], output_path: Path) -> Non
         "- Split ratios: `70/15/15` for train/validation/test.",
         f"- Seed: `{summary['seed']}`.",
         "- Scope: six target classes only; `Comb` rows are excluded from the ML split.",
-        "- Decision note: the blueprint allowed `70/15/15` or `80/10/10`; `70/15/15` was selected because 40 groups per class divides cleanly into 28/6/6 groups and gives larger validation/test sets.",
+        "- Decision note: `70/15/15` was selected because 40 groups per class divides cleanly into 28/6/6 groups and gives larger validation/test sets than `80/10/10`.",
         "",
         "## Counts",
         "",

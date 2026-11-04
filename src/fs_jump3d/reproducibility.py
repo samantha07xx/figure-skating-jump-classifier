@@ -114,7 +114,7 @@ def capture_run(output_dir: Path, *, split_csv: Path, data_root: Path,
         sources.extend(p for p in (PROJECT_ROOT / directory).rglob("*")
                        if p.is_file() and "__pycache__" not in p.parts)
     sources.extend(PROJECT_ROOT / name for name in
-                   ("README.md", "PROJECT_BLUEPRINT.md", "requirements.txt", "pyproject.toml", ".gitignore", "LICENSE", "CITATION.cff")
+                   ("README.md", "requirements.txt", "pyproject.toml", ".gitignore", "LICENSE", "CITATION.cff")
                    if (PROJECT_ROOT / name).is_file())
     source_records = []
     for source in sorted(sources):
