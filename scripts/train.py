@@ -17,8 +17,15 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs/train.yaml")
     parser.add_argument("--smoke", action="store_true")
+    parser.add_argument("--run-dir", type=Path, help="Use a new directory without editing the reference config")
+    parser.add_argument("--device", help="Explicit device for reproduction; default preserves config behavior")
     args = parser.parse_args()
-    summary = train(load_config(args.config, PROJECT_ROOT), smoke=args.smoke)
+    config = load_config(args.config, PROJECT_ROOT)
+    if args.run_dir is not None:
+        config["run_dir"] = str(args.run_dir.resolve())
+    if args.device is not None:
+        config["device"] = args.device
+    summary = train(config, smoke=args.smoke)
     print(yaml.safe_dump(summary, sort_keys=False))
 
 

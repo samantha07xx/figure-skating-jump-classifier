@@ -18,6 +18,7 @@ from fs_jump3d.evaluation import (
     write_evaluation_artifacts,
 )
 from fs_jump3d.training import select_device
+from fs_jump3d.reproducibility import capture_run, seal_outputs
 
 
 def main() -> None:
@@ -40,13 +41,21 @@ def main() -> None:
     print(f"Verified checkpoint epoch {checkpoint['epoch']} and {len(dataset)} test videos in 36 groups", flush=True)
     if args.verify_only:
         return
+    if args.output_dir.exists() and any(args.output_dir.iterdir()):
+        raise FileExistsError("evaluation output directory is not empty; choose a new --output-dir")
     device = select_device(args.device)
+    capture_run(args.output_dir / "provenance", split_csv=args.split_csv,
+                data_root=args.data_root,
+                config={**{key: str(value) if isinstance(value, Path) else value
+                           for key, value in vars(args).items()}, "actual_device": str(device)},
+                checkpoints=(args.checkpoint, args.training_summary), partitions=("test",))
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
     predictions = predict_test_videos(model, loader, device)
     if len(predictions) != len(dataset) or {row["filepath"] for row in predictions} != {row["filepath"] for row in dataset.rows}:
         raise ValueError("test prediction coverage is incomplete or duplicated")
     report, groups = build_report(predictions, args.checkpoint, device)
     write_evaluation_artifacts(args.output_dir, predictions, groups, report)
+    seal_outputs(args.output_dir / "provenance", sorted(p for p in args.output_dir.iterdir() if p.is_file()))
     print(f"Video accuracy: {report['video_level']['accuracy']:.4f}")
     print(f"Video macro F1: {report['video_level']['macro']['f1']:.4f}")
     print(f"Group accuracy: {report['group_level']['accuracy']:.4f}")

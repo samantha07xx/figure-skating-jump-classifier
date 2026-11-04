@@ -18,20 +18,33 @@ from fs_jump3d.evaluation import classification_metrics, slice_metrics
 from fs_jump3d.preprocessing import PreprocessConfig
 from fs_jump3d.training import load_checkpoint, select_device
 from fs_jump3d.training_data import SplitVideoDataset
+from fs_jump3d.reproducibility import capture_run, seal_outputs
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--split-csv", type=Path, default=ROOT / "data/splits/dataset_split.csv")
+    parser.add_argument("--data-root", type=Path, default=ROOT / "data/raw/fs-jump3d")
+    parser.add_argument("--cache-dir", type=Path, default=ROOT / "data/processed/frame_cache")
+    parser.add_argument("--device", default="auto")
     args = parser.parse_args()
+    provenance_dir = args.output.with_name(args.output.name + ".provenance")
+    if args.output.exists() or provenance_dir.exists():
+        raise FileExistsError("validation output already exists; choose a new output filename")
     model, metadata = load_checkpoint(args.checkpoint)
-    device = select_device("auto")
+    device = select_device(args.device)
     model = model.to(device).eval()
-    dataset = SplitVideoDataset(ROOT / "data/splits/dataset_split.csv", ROOT / "data/raw/fs-jump3d",
+    capture_run(provenance_dir, split_csv=args.split_csv, data_root=args.data_root,
+                cache_dir=args.cache_dir, checkpoints=(args.checkpoint,), partitions=("val",),
+                config={**{key: str(value) if isinstance(value, Path) else value
+                           for key, value in vars(args).items()},
+                        **metadata["preprocessing_config"], "actual_device": str(device)})
+    dataset = SplitVideoDataset(args.split_csv, args.data_root,
                                 "val", PreprocessConfig(**metadata["preprocessing_config"]),
-                                cache_dir=ROOT / "data/processed/frame_cache")
-    with (ROOT / "data/splits/dataset_split.csv").open(newline="") as file:
+                                cache_dir=args.cache_dir)
+    with args.split_csv.open(newline="") as file:
         rows = {row["filepath"]: row for row in csv.DictReader(file) if row["split"] == "val"}
     predictions = []
     with torch.inference_mode():
@@ -49,6 +62,7 @@ def main() -> None:
               "by_camera": slice_metrics(predictions, "camera")}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2) + "\n")
+    seal_outputs(provenance_dir, [args.output])
     print(json.dumps({"accuracy": report["video_level"]["accuracy"],
                       "macro_f1": report["video_level"]["macro"]["f1"]}))
 

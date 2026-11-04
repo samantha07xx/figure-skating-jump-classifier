@@ -16,6 +16,7 @@ from fs_jump3d.dataset import TARGET_CLASSES
 from fs_jump3d.model import CNNBiLSTM, ModelConfig, parameter_count
 from fs_jump3d.preprocessing import PreprocessConfig
 from fs_jump3d.training_data import make_loaders
+from fs_jump3d.reproducibility import capture_run, seal_outputs
 
 
 def seed_everything(seed: int) -> None:
@@ -44,7 +45,8 @@ def select_device(requested: str) -> torch.device:
 def load_config(path: Path, project_root: Path) -> dict[str, object]:
     config = yaml.safe_load(Path(path).read_text())
     for key in ("split_csv", "data_root", "run_dir", "cache_dir"):
-        config[key] = str((project_root / config[key]).resolve())
+        if config.get(key) is not None:
+            config[key] = str((project_root / config[key]).resolve())
     return config
 
 
@@ -127,6 +129,8 @@ def build_scheduler(optimizer: torch.optim.Optimizer, config: dict[str, object])
 
 
 def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
+    if config.get("loss", "CrossEntropyLoss") != "CrossEntropyLoss":
+        raise ValueError("only CrossEntropyLoss is implemented; configuration cannot override it")
     seed_everything(int(config["seed"]))
     device = select_device(str(config["device"]))
     preprocess = PreprocessConfig(int(config["frames_per_clip"]), int(config["image_size"]))
@@ -137,11 +141,16 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
     run_dir = Path(config["run_dir"])
     if smoke:
         run_dir = run_dir / "smoke"
-    if (run_dir / "summary.json").exists():
-        raise FileExistsError(f"run directory already contains a training summary: {run_dir}")
+    if run_dir.exists() and any(run_dir.iterdir()):
+        raise FileExistsError(f"run directory is not empty; choose a new run_dir: {run_dir}")
     run_dir.mkdir(parents=True, exist_ok=True)
     resolved = {**config, "actual_device": str(device), "parameter_count": parameter_count(model), "smoke": smoke}
     (run_dir / "resolved_config.yaml").write_text(yaml.safe_dump(resolved, sort_keys=False))
+    print("Recording source, environment, dataset and cache fingerprints...", flush=True)
+    capture_run(run_dir / "provenance", split_csv=Path(config["split_csv"]),
+                data_root=Path(config["data_root"]), config=resolved,
+                cache_dir=Path(config["cache_dir"]) if config.get("cache_dir") else None,
+                partitions=("train", "val"))
     train_loader, val_loader = make_loaders(
         Path(config["split_csv"]), Path(config["data_root"]), preprocess,
         int(config["batch_size"]), int(config["num_workers"]), int(config["seed"]),
@@ -188,4 +197,6 @@ def train(config: dict[str, object], smoke: bool = False) -> dict[str, object]:
         print(json.dumps(row), flush=True)
         if summary["early_stopping_triggered"]:
             break
+    seal_outputs(run_dir / "provenance", [run_dir / name for name in
+                 ("resolved_config.yaml", "history.csv", "summary.json", "best_model.pt")])
     return summary

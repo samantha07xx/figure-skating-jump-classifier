@@ -9,6 +9,7 @@ htmlcov/
 
 # Environments
 .venv/
+.venv-reproduction/
 venv/
 env/
 
@@ -37,6 +38,9 @@ reports/
 uploads/
 data/processed/
 data/interim/
+data/reproduction/
+**/provenance/
+*.provenance/
 
 # Keep small reproducible audit/split/preprocessing outputs tracked.
 !data/

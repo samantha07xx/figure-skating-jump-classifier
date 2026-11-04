@@ -1,5 +1,11 @@
 # Figure Skating Jump Recognition
 
+Research setup, training, evaluation and fingerprint verification:
+[Reproducibility guide](docs/REPRODUCIBILITY.md).
+An exact snapshot of the currently inspected dependencies is saved in
+`environments/requirements-current.txt`; historical training environments were
+not fully recorded and cannot be reconstructed with certainty retroactively.
+
 A local web app that classifies an already-trimmed figure-skating jump video as **Axel, Flip, Loop, Lutz, Salchow, or Toe Loop**. It uses OpenCV video preprocessing and a custom PyTorch CNN-BiLSTM, then displays the predicted class, model confidence, and probabilities for all six classes. The web-served model achieved **65.97% video-level accuracy** on the held-out FS-Jump3D test split.
 
 ## How it works
