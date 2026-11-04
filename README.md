@@ -1,67 +1,86 @@
 # Figure Skating Jump Recognition
 
-A video classification project for six figure-skating jumps: **Axel, Flip, Loop, Lutz, Salchow, and Toe Loop**. It combines a custom PyTorch CNN-BiLSTM with a research pipeline for data auditing, grouped splits, controlled experiments, and detailed evaluation, plus a FastAPI web demo for single-video prediction.
+CNN-BiLSTM classification of six figure-skating jumps from trimmed RGB video clips: Axel, Flip, Loop, Lutz, Salchow, and Toe Loop. This repository contains data preparation, training, evaluation, and single-video inference code, with a FastAPI web demo.
 
-The model trained with clip-consistent augmentation achieved **71.99% video-level accuracy** and **0.719 macro F1** on the held-out FS-Jump3D test split: **311 correct predictions out of 432 videos**, improving accuracy by **6.02 percentage points** over the baseline.
+## Method
 
-## Project highlights
+OpenCV uniformly samples 32 frames per clip, resizes them to 224 × 224, converts them to RGB, and normalizes pixel values to `[0, 1]`. A shared CNN encodes each frame; a bidirectional LSTM models the sequence; a classifier outputs scores for the six jump classes.
 
-- **Spatial and temporal modeling:** a shared CNN encodes video frames and a bidirectional LSTM models the jump sequence.
-- **Group-aware evaluation:** all 12 camera views of each physical jump attempt stay in the same data partition.
-- **Controlled experiments:** compare training-only augmentation, AdamW, and learning-rate scheduling against the same baseline.
-- **Inspectable results:** per-video predictions, confusion matrices, and class, camera, and skater breakdowns are included in the repository.
-- **Experiment traceability:** new training and evaluation runs save source/configuration snapshots, environment metadata, and SHA-256 fingerprints for inputs and results.
+Experiments compare the baseline with clip-consistent spatial and photometric augmentation, AdamW, and learning-rate scheduling. Augmentation is applied only during training. The task assumes an already-trimmed single jump; jump detection in full programs and jump-quality scoring are outside its scope.
 
-## How it works
+## Dataset and experimental protocol
 
-The browser accepts one MP4 containing a single jump, shows a preview, and sends it to a FastAPI `POST /predict` endpoint. The backend validates the upload, runs inference with a model loaded once at startup, and removes the temporary video after the request. Uploads are limited to 100 MB by default.
+The six-class subset of [FS-Jump3D](https://github.com/ryota-skating/FS-Jump3D) used here contains 2,880 videos from 240 physical jump attempts by four skaters, with 12 camera views per attempt. Combination jumps are excluded.
 
-OpenCV uniformly samples 32 frames per clip, converts them to 224 x 224 RGB images, and normalizes values to `[0, 1]`. A shared CNN extracts spatial features from each frame; a bidirectional LSTM models their sequence; a classifier produces six output scores. The interface does not find jumps in full programs or score jump quality.
+Data are split by physical attempt, keeping all camera views of an attempt in one partition:
 
-## Data and results
-
-The [FS-Jump3D](https://github.com/ryota-skating/FS-Jump3D) RGB data used here has **2,880 six-class videos from 240 physical jump attempts**. Each attempt was captured from 12 camera views. Train, validation, and test assignments are made by physical attempt, keeping all views of the same jump together to prevent data leakage. Combination jumps are excluded.
-
-| Checkpoint | Validation accuracy / macro F1 | Held-out test accuracy / macro F1 |
+| Partition | Physical attempts | Videos |
 | --- | ---: | ---: |
-| CNN-BiLSTM baseline | 67.13% / 0.673 | 65.97% / 0.652 |
-| CNN-BiLSTM + training-only augmentation | 70.37% / 0.701 | **71.99% / 0.719** |
+| Training | 168 | 2,016 |
+| Validation | 36 | 432 |
+| Test | 36 | 432 |
 
-The augmented model also achieved **83.33% attempt-level accuracy** when averaging predictions across all 12 camera views. This multi-view result is reported separately from single-video classification.
+Experiments use seed 42, the same split and model architecture, a 30-epoch limit, and early stopping with patience 5. Each run's checkpoint is selected by minimum validation loss. Candidate methods are compared on validation data before the selected augmentation model is evaluated on the held-out test set.
 
-See the [controlled experiment comparison](data/experiments/improvement_phase1/comparison.md) and [held-out test report](data/evaluation/phase1_augmentation_final/final_comparison.md) for the complete results. Detailed predictions and confusion matrices are saved under `data/evaluation/`.
+All four skaters appear in each partition. This protocol evaluates held-out attempts under the dataset's recording conditions; it does not measure unseen-skater or uncontrolled-video generalization. Results are from single-seed runs.
 
-**Evaluation scope:** controlled footage from four skaters, with physical attempts held out across splits. All four skaters appear in each partition; unseen-skater and uncontrolled-video generalization remain future evaluation tasks.
+## Results
 
-**Web demo:** the current demo uses the baseline checkpoint (65.97% test accuracy), configured in `configs/inference.yaml`. The 71.99% result belongs to the separately preserved augmentation checkpoint.
+Accuracy and macro F1 below are computed per video, treating each camera view as one prediction.
 
-## Run locally
+| Model | Validation accuracy | Validation macro F1 | Test accuracy | Test macro F1 |
+| --- | ---: | ---: | ---: | ---: |
+| CNN-BiLSTM baseline | 67.13% | 0.673 | 65.97% | 0.652 |
+| CNN-BiLSTM + training-only augmentation | 70.37% | 0.701 | 71.99% | 0.719 |
+
+The [experiment comparison](data/experiments/improvement_phase1/comparison.md) reports all candidate runs and validation-based selection. The [test report](data/evaluation/phase1_augmentation_final/final_comparison.md) includes per-class metrics, camera and skater breakdowns, error analysis, and a separate multi-view evaluation that averages probabilities across an attempt's camera views. Prediction files and confusion matrices are available under `data/evaluation/`.
+
+## Setup and reproduction
 
 From the repository root:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
+.venv/bin/python -m pytest
 ```
 
-Open **http://127.0.0.1:8000**, then upload one already-trimmed single-jump MP4. The model checkpoint is not included in Git: the web app requires the exact checkpoint specified in `configs/inference.yaml` and will fail to start without it. Raw FS-Jump3D videos are also not included.
+Raw videos and model checkpoints are not included in Git. The [reproducibility guide](docs/REPRODUCIBILITY.md) documents data preparation, the expected directory layout, training, validation, test evaluation, and artifact verification. A pinned snapshot of the current environment is available in [`environments/requirements-current.txt`](environments/requirements-current.txt).
 
-For command-line prediction with the same checkpoint:
-
-```bash
-.venv/bin/python scripts/predict_video.py path/to/trimmed_jump.mp4
-```
-
-Run the automated tests with `.venv/bin/python -m pytest`. Model, data, and API code is in `src/fs_jump3d/`; the browser UI is in `web/`, and reproducible configs and CLI scripts are in `configs/` and `scripts/`.
-
-## Reproduce the experiments
-
-The [reproducibility guide](docs/REPRODUCIBILITY.md) covers dataset preparation, training, validation, held-out evaluation, and artifact verification. A pinned snapshot of the current environment is available in [`environments/requirements-current.txt`](environments/requirements-current.txt).
+Train into a new directory for each run:
 
 ```bash
 .venv/bin/python scripts/train.py --config configs/train.yaml --run-dir models/runs/reproduction/baseline
 .venv/bin/python scripts/train.py --config configs/improvement_phase1_augmentation.yaml --run-dir models/runs/reproduction/augmentation
 ```
 
-Each run writes its configuration, training history, best checkpoint, and provenance records to its own directory.
+Each run saves its configuration, training history, selected checkpoint, source snapshot, environment metadata, and input/result fingerprints.
+
+## Inference demo
+
+The web demo uses the baseline checkpoint specified in `configs/inference.yaml`; the augmentation checkpoint is preserved separately. Place the matching checkpoint at the configured path before starting the server.
+
+```bash
+.venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
+```
+
+Open http://127.0.0.1:8000 and upload one trimmed single-jump MP4. The interface displays the predicted class and softmax probabilities. The backend loads the model at startup and deletes temporary uploads after each request. The default upload limit is 100 MB.
+
+For command-line prediction using the same checkpoint:
+
+```bash
+.venv/bin/python scripts/predict_video.py path/to/trimmed_jump.mp4
+```
+
+## Repository structure
+
+| Path | Contents |
+| --- | --- |
+| `src/fs_jump3d/` | Data processing, model, training, evaluation, and inference modules |
+| `scripts/` | Command-line entry points |
+| `configs/` | Experiment settings and protocol descriptions |
+| `data/` | Tracked audit, split, and experiment results; local raw data and caches |
+| `tests/` | Automated checks |
+| `web/` | Web demo interface |
+| `docs/` | Reproduction instructions |
+| `environments/` | Dependency snapshot |
