@@ -54,5 +54,10 @@ the upstream dataset download was not re-executed.
 
 This was a real local HTTP deployment check on macOS arm64, not cloud hosting,
 a browser visual check, full-test-set inference, or a new full training run.
-The dependency correction and README quick-start changes were tested locally
-and need their own commit/CI run after this record is updated.
+The dependency correction and README quick-start changes were committed in
+`daeb6a9` and passed [GitHub Actions](https://github.com/samantha07xx/figure-skating-jump-classifier/actions/runs/41877947344).
+A fresh clone of that revision was then installed in a new Python 3.13 environment:
+dependency checks, 50 Python tests, two JavaScript tests, bundled-model installation,
+and all 12 HTTP video predictions passed, using MPS and matching the historical
+predicted labels. The subsequent documentation and blueprint cleanup revision
+`68bf664` also passed [GitHub Actions](https://github.com/samantha07xx/figure-skating-jump-classifier/actions/runs/41892349265).

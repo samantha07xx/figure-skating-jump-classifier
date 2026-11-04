@@ -163,12 +163,19 @@ and reported scores are not rewritten by this update.
 
 ## Verify or archive
 
-```bash
-# Capture the current dataset/cache/checkpoint state without training.
-.venv/bin/python scripts/reproducibility.py capture --output-dir data/reproduction/current-snapshot --checkpoint models/runs/milestone4/best_model.pt
+After preparing the dataset as described above, install the bundled augmentation
+checkpoint and capture its current inputs in a new directory:
 
-# Verify source, data, caches, source/split snapshots and sealed results.
+```bash
+.venv/bin/python scripts/install_model.py
+
+# Capture the current dataset/cache/checkpoint state without training.
+.venv/bin/python scripts/reproducibility.py capture --config configs/improvement_phase1_augmentation.yaml --output-dir data/reproduction/current-snapshot --checkpoint models/runs/improvement_phase1/augmentation/best_model.pt
+
+# Verify the captured snapshot.
 .venv/bin/python scripts/reproducibility.py verify data/reproduction/current-snapshot/manifest.json
+
+# If you trained the new baseline run above, verify its sealed experiment record.
 .venv/bin/python scripts/reproducibility.py verify models/runs/reproduction/baseline/provenance/manifest.json
 ```
 
@@ -194,5 +201,8 @@ prove historical execution order.
 ```
 
 The web demo now uses the evaluated augmentation checkpoint (epoch 30), pinned
-by SHA-256 in `configs/inference.yaml`. The baseline remains available separately.
+by SHA-256 in `configs/inference.yaml`. Historical baseline results remain in
+`data/training/milestone4/` and `data/evaluation/milestone5/`; its checkpoint is
+not bundled. Train a new baseline using the instructions above to evaluate that
+configuration.
 New research runs do not automatically replace the deployed model.
