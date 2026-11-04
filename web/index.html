@@ -4,15 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Figure Skating Jump Recognition</title>
-  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/app.css?v=layout-2">
   <script defer src="/app.js"></script>
 </head>
 <body>
   <header class="topbar"><span class="mark" aria-hidden="true">✳</span><span>Figure Skating Jump Recognition</span></header>
   <main>
-    <div class="heading"><span class="eyebrow">Video classification · Research demo</span><h1>Analyze a jump</h1><p>Upload an MP4 clip containing one complete jump, from takeoff to landing.</p><p class="supported-classes">Axel · Flip · Loop · Lutz · Salchow · Toe Loop</p></div>
+    <div class="heading">
+      <span class="eyebrow">Video classification · Research demo</span>
+      <h1>Analyze a jump</h1>
+      <p>Upload an MP4 clip containing one complete jump, from takeoff to landing.</p>
+      <ul class="supported-classes" aria-label="Supported jump classes"><li>Axel</li><li>Flip</li><li>Loop</li><li>Lutz</li><li>Salchow</li><li>Toe Loop</li></ul>
+    </div>
     <div class="workspace">
       <section class="input-pane" aria-label="Video upload">
+        <div class="pane-heading"><h2>Jump video</h2><span>Single clip · MP4</span></div>
         <label id="dropzone" class="dropzone" for="video"><span class="upload-icon" aria-hidden="true">↑</span><strong>Choose an MP4 or drop it here</strong><span id="file-name">No video selected</span></label>
         <input id="video" type="file" accept=".mp4,video/mp4" aria-label="Choose a single-jump MP4">
         <video id="preview" controls playsinline hidden></video>
@@ -30,7 +36,7 @@
       </section>
     </div>
     <details class="model-info">
-      <summary>Model &amp; evaluation</summary>
+      <summary><span>Model &amp; evaluation</span><span class="summary-hint">Method, results &amp; scope</span></summary>
       <div class="model-info-grid">
         <section aria-labelledby="model-heading">
           <h2 id="model-heading">Model</h2>
