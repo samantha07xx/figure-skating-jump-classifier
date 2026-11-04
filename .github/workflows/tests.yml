@@ -11,9 +11,12 @@ jobs:
         with:
           python-version: '3.13'
           cache: pip
-          cache-dependency-path: environments/requirements-current.txt
-      - run: python -m pip install -r environments/requirements-current.txt
+          cache-dependency-path: |
+            requirements.txt
+            environments/requirements-current.txt
+      - run: python -m pip install -r requirements.txt
       - run: python -m pip check
+      - run: python scripts/install_model.py
       - run: python -m pytest -q
       - uses: actions/setup-node@v4
         with:

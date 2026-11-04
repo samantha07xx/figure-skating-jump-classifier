@@ -10,7 +10,7 @@ existing runs. It does not retrain or replace historical checkpoints.
 ## Environment
 
 Run commands from the repository root. The existing `.venv` remains untouched.
-`requirements.txt` describes supported dependency lower bounds;
+`requirements.txt` installs the tested pinned dependency set;
 `environments/requirements-current.txt` pins the installed packages observed during
 this organization update. Its header records Python and platform. It is an
 environment snapshot, **not evidence of the original training environment** and
@@ -21,7 +21,7 @@ To recreate that snapshot on a compatible Python/platform in a new environment:
 
 ```bash
 python3.13 -m venv .venv-reproduction
-.venv-reproduction/bin/python -m pip install -r environments/requirements-current.txt
+.venv-reproduction/bin/python -m pip install -r requirements.txt
 .venv-reproduction/bin/python -m pytest -q
 ```
 

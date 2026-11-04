@@ -27,3 +27,32 @@ report. GitHub Actions passed for commit `1ddd247` (run [41871900641](https://gi
 
 Remaining research work: repeat-seed experiments and, if the research question
 requires it, unseen-skater evaluation. The evaluated model is now bundled for installation; see `DATA_AND_MODELS.md`. These are separate from the engineering checks above.
+
+
+## Fresh GitHub clone and HTTP deployment
+
+A new clone of commit `ad363cb` was created in a temporary directory with its own
+Python environment and no raw dataset or prior run outputs. Installing the
+original minimum-version requirements selected PyTorch 2.15.0. Although the
+unit tests passed, the first MPS HTTP inference aborted with a native
+`MPSNDArray initWithBuffer:offset:descriptor:` exception on this Mac.
+
+The default `requirements.txt` now delegates to the already validated pinned
+snapshot (PyTorch 2.14.0). After reinstalling those versions in the independent
+clone, dependency checks and all 50 Python tests passed. The two JavaScript
+request tests also passed. The model installer used only the bundled weights.
+The app was started independently on port 8001, leaving the original port-8000
+service running.
+
+The homepage, CSS, JavaScript, health and configuration endpoints returned 200.
+Twelve external test-video uploads (lexicographically first two test paths per
+class) all completed successfully, used model ID `epoch-30-8ab4aaa77dc4`, and
+matched all 12 historical predicted labels. Six predictions were correct;
+this diagnostic subset is not an estimate of full-test accuracy. A non-MP4
+upload returned 415. Videos were supplied from the existing local dataset;
+the upstream dataset download was not re-executed.
+
+This was a real local HTTP deployment check on macOS arm64, not cloud hosting,
+a browser visual check, full-test-set inference, or a new full training run.
+The dependency correction and README quick-start changes were tested locally
+and need their own commit/CI run after this record is updated.

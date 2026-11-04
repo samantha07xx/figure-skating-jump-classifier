@@ -35,54 +35,72 @@ Accuracy and macro F1 below are computed per video, treating each camera view as
 
 The [experiment comparison](data/experiments/improvement_phase1/comparison.md) reports all candidate runs and validation-based selection. The [test report](data/evaluation/phase1_augmentation_final/final_comparison.md) includes per-class metrics, camera and skater breakdowns, error analysis, and a separate multi-view evaluation that averages probabilities across an attempt's camera views. Prediction files and confusion matrices are available under `data/evaluation/`.
 
-## Setup and reproduction
+## Quick start: run the demo
 
-From the repository root:
+Use Python 3.13. The following commands were verified on macOS arm64. The default
+requirements install the pinned dependency set used by the validated environment
+and CI. A trained checkpoint is included; no retraining or full dataset download
+is needed to launch the demo.
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-.venv/bin/python -m pytest
+git clone https://github.com/samantha07xx/figure-skating-jump-classifier.git
+cd figure-skating-jump-classifier
+python3.13 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python scripts/install_model.py
+.venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
 ```
 
-Raw videos are obtained separately from FS-Jump3D. The evaluated augmentation checkpoint is bundled under `artifacts/augmentation-v1/`; other training outputs are excluded from Git. The [reproducibility guide](docs/REPRODUCIBILITY.md) documents data preparation, the expected directory layout, training, validation, test evaluation, and artifact verification. A pinned snapshot of the current environment is available in [`environments/requirements-current.txt`](environments/requirements-current.txt).
+Open http://127.0.0.1:8000 and upload a trimmed single-jump MP4. Supply your own
+clip or obtain videos from the [dataset source](docs/DATA_AND_MODELS.md); raw
+videos are not bundled. The interface displays the predicted class and softmax
+probabilities. The default upload limit is 100 MB. Stop the server with Ctrl+C.
+If port 8000 is occupied, choose another port such as `--port 8001`.
 
-Train into a new directory for each run:
+The installer verifies the bundled checkpoint's SHA-256 before placing it at the
+path in `configs/inference.yaml`. Other training outputs remain excluded from Git.
+For command-line prediction with the same model:
+
+```bash
+.venv/bin/python scripts/predict_video.py path/to/trimmed_jump.mp4
+```
+
+Optional checks: `.venv/bin/python -m pytest` runs the Python tests;
+`node --test tests/web_requests.test.cjs` checks asynchronous UI request handling
+(Node.js 22). Node.js is not required to run the demo. Other operating systems
+have not been deployment-tested; Windows uses `.venv\Scripts\python.exe` in
+place of `.venv/bin/python` and `.venv\Scripts\python.exe -m uvicorn` in
+place of `.venv/bin/uvicorn` to launch the server.
+
+## Reproduce the experiments
+
+Obtain the FS-Jump3D RGB videos separately and preserve the committed data split.
+The [reproducibility guide](docs/REPRODUCIBILITY.md) covers data preparation,
+training, validation, test evaluation and artifact verification. The pinned
+environment is recorded in [`environments/requirements-current.txt`](environments/requirements-current.txt).
+
+To evaluate the existing augmentation checkpoint reported above, after preparing
+the videos and running the model installer:
+
+```bash
+.venv/bin/python scripts/evaluate.py --checkpoint models/runs/improvement_phase1/augmentation/best_model.pt --training-summary data/experiments/improvement_phase1/augmentation_summary.json --expected-epoch 30 --output-dir data/reproduction/augmentation_test
+```
+
+Use a new output directory. Running `evaluate.py` without arguments selects the
+historical baseline, not the current demo model. The baseline checkpoint is not
+bundled; train a new baseline to evaluate that configuration.
+
+To train new runs:
 
 ```bash
 .venv/bin/python scripts/train.py --config configs/train.yaml --run-dir models/runs/reproduction/baseline
 .venv/bin/python scripts/train.py --config configs/improvement_phase1_augmentation.yaml --run-dir models/runs/reproduction/augmentation
 ```
 
-Each run saves its configuration, training history, selected checkpoint, source snapshot, environment metadata, and input/result fingerprints.
-
-To evaluate the **existing augmentation checkpoint reported above**, after obtaining
-the videos and installing the matching weights:
-
-```bash
-.venv/bin/python scripts/evaluate.py --checkpoint models/runs/improvement_phase1/augmentation/best_model.pt --training-summary data/experiments/improvement_phase1/augmentation_summary.json --expected-epoch 30 --output-dir data/reproduction/augmentation_test
-```
-
-Use a new output directory. For a newly trained run, supply that run's checkpoint,
-`summary.json`, and its recorded `best_epoch` instead. Running `evaluate.py` without
-arguments selects the historical baseline, not the current demo model.
-
-## Inference demo
-
-The web demo uses the evaluated augmentation checkpoint specified in `configs/inference.yaml`. Install the bundled checkpoint before starting the server; the installer checks its SHA-256 and preserves any different existing model.
-
-```bash
-.venv/bin/python scripts/install_model.py
-.venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
-```
-
-Open http://127.0.0.1:8000 and upload one trimmed single-jump MP4. The interface displays the predicted class and softmax probabilities. The backend loads the model at startup and deletes temporary uploads after each request. The default upload limit is 100 MB.
-
-For command-line prediction using the same checkpoint:
-
-```bash
-.venv/bin/python scripts/predict_video.py path/to/trimmed_jump.mp4
-```
+Each run saves its configuration, history, selected checkpoint, source snapshot,
+environment metadata and input/result fingerprints. To evaluate a newly trained
+run, supply its own checkpoint, `summary.json`, and recorded `best_epoch`.
+Retraining can produce different numerical results across seeds and hardware.
 
 ## Repository structure
 
