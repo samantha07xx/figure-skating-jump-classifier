@@ -115,3 +115,10 @@ Dataset access, checkpoint availability, and installation are documented in
 for repository citation metadata and cite the original FS-Jump3D paper when using
 the dataset. Reproduction instructions and verified environment checks are in the
 [reproducibility guide](docs/REPRODUCIBILITY.md) and [validation record](docs/VALIDATION.md).
+
+## License
+
+Project source code and accompanying documentation are licensed under [MIT](LICENSE).
+The FS-Jump3D dataset and bundled model weights are excluded from this license;
+see [data and model information](docs/DATA_AND_MODELS.md) and the
+[checkpoint record](artifacts/augmentation-v1/README.md).

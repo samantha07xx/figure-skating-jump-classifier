@@ -42,7 +42,9 @@ After cloning the repository:
 An optional checkpoint argument installs a separately obtained copy instead:
 `python scripts/install_model.py /path/to/best_model.pt`.
 See the [artifact record](../artifacts/augmentation-v1/README.md) for dataset
-attribution. No new code license has been added.
+attribution. Project source code and accompanying documentation use the
+[MIT license](../LICENSE). The dataset and bundled checkpoint are excluded from
+that license; repository citation metadata describes the software license only.
 
 The installer verifies the pinned hash before installing and refuses to replace
 a different checkpoint. A newly trained model will usually have a different
