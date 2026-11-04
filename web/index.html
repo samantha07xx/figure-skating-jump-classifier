@@ -10,7 +10,7 @@
 <body>
   <header class="topbar"><span class="mark" aria-hidden="true">✳</span><span>Figure Skating Jump Recognition</span></header>
   <main>
-    <div class="heading"><h1>Analyze a jump</h1><p>Upload one already-trimmed single-jump MP4. Full skating programs are not supported.</p></div>
+    <div class="heading"><span class="eyebrow">Video classification · Research demo</span><h1>Analyze a jump</h1><p>Upload an MP4 clip containing one complete jump, from takeoff to landing.</p><p class="supported-classes">Axel · Flip · Loop · Lutz · Salchow · Toe Loop</p></div>
     <div class="workspace">
       <section class="input-pane" aria-label="Video upload">
         <label id="dropzone" class="dropzone" for="video"><span class="upload-icon" aria-hidden="true">↑</span><strong>Choose an MP4 or drop it here</strong><span id="file-name">No video selected</span></label>
@@ -22,14 +22,34 @@
       <section id="result" class="result" aria-label="Prediction" hidden>
         <div class="result-title">Prediction</div>
         <h2 id="predicted-label"></h2>
-        <div class="confidence"><strong id="confidence"></strong><span>Model confidence</span></div>
+        <div class="confidence"><strong id="confidence"></strong><span>Predicted-class probability</span></div>
         <div class="divider"></div>
         <h3>Class probabilities</h3>
         <div id="probabilities"></div>
-        <p class="note">Model confidence is not a guarantee of correctness.</p>
+        <p class="note">Scores are softmax probabilities across the six classes, not calibrated estimates of prediction correctness. The model always selects one of these classes.</p>
       </section>
     </div>
-    <details class="limitations"><summary>About this model and its limitations</summary><p>This six-class model was evaluated on a controlled FS-Jump3D held-out split: 65.97% video-level accuracy and 0.652 macro F1. It expects one already-trimmed jump. It does not locate jumps in full programs, classify combinations, count rotations, or score GOE or jump quality. Performance on broadcast, internet, or phone video is not established.</p></details>
+    <details class="model-info">
+      <summary>Model &amp; evaluation</summary>
+      <div class="model-info-grid">
+        <section aria-labelledby="model-heading">
+          <h2 id="model-heading">Model</h2>
+          <p>This demo runs the CNN-BiLSTM baseline with 32 sampled RGB frames per clip. It predicts jump type from a single camera view.</p>
+        </section>
+        <section aria-labelledby="evaluation-heading">
+          <h2 id="evaluation-heading">Evaluation</h2>
+          <p>On the FS-Jump3D held-out test split, this checkpoint scored 65.97% video-level accuracy and 0.652 macro F1 across 432 videos. Camera views of the same attempt were kept in one partition.</p>
+        </section>
+        <section aria-labelledby="scope-heading">
+          <h2 id="scope-heading">Scope</h2>
+          <p>Use a trimmed, single-jump clip. Full-program detection, combination classification, rotation counting, and jump-quality scoring are outside this task.</p>
+        </section>
+        <section aria-labelledby="data-heading">
+          <h2 id="data-heading">Data context</h2>
+          <p>Training and evaluation use controlled recordings from four skaters, with all four represented in each partition. Performance on unseen skaters or broadcast and phone footage has not been evaluated.</p>
+        </section>
+      </div>
+    </details>
   </main>
 </body>
 </html>
