@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the evaluated checkpoint from a separately supplied local file."""
+"""Verify and install the bundled evaluated checkpoint (or a supplied copy)."""
 import argparse
 import hashlib
 from pathlib import Path
@@ -37,6 +37,8 @@ def install(source: Path) -> Path:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('checkpoint', type=Path)
+    parser.add_argument('checkpoint', type=Path, nargs='?',
+                        default=ROOT / 'artifacts/augmentation-v1/best_model.pt',
+                        help='Optional checkpoint path; defaults to the bundled evaluated model')
     args = parser.parse_args()
     print(install(args.checkpoint))

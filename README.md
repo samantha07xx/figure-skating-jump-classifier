@@ -45,7 +45,7 @@ python3 -m venv .venv
 .venv/bin/python -m pytest
 ```
 
-Raw videos and model checkpoints are not included in Git. The [reproducibility guide](docs/REPRODUCIBILITY.md) documents data preparation, the expected directory layout, training, validation, test evaluation, and artifact verification. A pinned snapshot of the current environment is available in [`environments/requirements-current.txt`](environments/requirements-current.txt).
+Raw videos are obtained separately from FS-Jump3D. The evaluated augmentation checkpoint is bundled under `artifacts/augmentation-v1/`; other training outputs are excluded from Git. The [reproducibility guide](docs/REPRODUCIBILITY.md) documents data preparation, the expected directory layout, training, validation, test evaluation, and artifact verification. A pinned snapshot of the current environment is available in [`environments/requirements-current.txt`](environments/requirements-current.txt).
 
 Train into a new directory for each run:
 
@@ -69,9 +69,10 @@ arguments selects the historical baseline, not the current demo model.
 
 ## Inference demo
 
-The web demo uses the evaluated augmentation checkpoint specified in `configs/inference.yaml`; the baseline checkpoint is preserved separately. Place the matching checkpoint at the configured path before starting the server.
+The web demo uses the evaluated augmentation checkpoint specified in `configs/inference.yaml`. Install the bundled checkpoint before starting the server; the installer checks its SHA-256 and preserves any different existing model.
 
 ```bash
+.venv/bin/python scripts/install_model.py
 .venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
 ```
 
@@ -90,6 +91,7 @@ For command-line prediction using the same checkpoint:
 | `src/fs_jump3d/` | Data processing, model, training, evaluation, and inference modules |
 | `scripts/` | Command-line entry points |
 | `configs/` | Experiment settings and protocol descriptions |
+| `artifacts/augmentation-v1/` | Evaluated demo checkpoint, checksum and provenance |
 | `data/` | Tracked audit, split, and experiment results; local raw data and caches |
 | `tests/` | Automated checks |
 | `web/` | Web demo interface |

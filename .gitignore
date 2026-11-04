@@ -32,6 +32,7 @@ data/raw/
 models/
 checkpoints/
 *.pt
+!artifacts/augmentation-v1/best_model.pt
 *.pth
 *.ckpt
 reports/

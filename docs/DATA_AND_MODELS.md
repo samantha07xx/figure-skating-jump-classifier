@@ -27,19 +27,22 @@ Dataset reference:
 - Report: `data/evaluation/phase1_augmentation_final/final_comparison.md`.
 - Installation target: `models/runs/improvement_phase1/augmentation/best_model.pt`.
 
-The checkpoint is not included in Git and no public checkpoint download is
-published yet. The application therefore cannot be started from a clone alone.
-A local release bundle has been prepared; it is not a hosted release or a grant
-of a separate weights license. Publication and weight-specific terms must be
-settled before distribution. Reproduction instructions do not replace the terms
-applicable to the data and weights.
+The exact evaluated checkpoint is bundled in `artifacts/augmentation-v1/` together
+with its checksum and provenance. It is approximately 4.6 MB and is provided for
+reproducing the reported experiment. Raw data and other model runs remain excluded.
+The model has not been repackaged, quantized or retrained.
 
-When you have a copy of the evaluated checkpoint:
+After cloning the repository:
 
 ```bash
-.venv/bin/python scripts/install_model.py /path/to/best_model.pt
+.venv/bin/python scripts/install_model.py
 .venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
 ```
+
+An optional checkpoint argument installs a separately obtained copy instead:
+`python scripts/install_model.py /path/to/best_model.pt`.
+See the [artifact record](../artifacts/augmentation-v1/README.md) for dataset
+attribution. No new code license has been added.
 
 The installer verifies the pinned hash before installing and refuses to replace
 a different checkpoint. A newly trained model will usually have a different

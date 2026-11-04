@@ -181,7 +181,7 @@ manifest intentionally invalidates its seal. SHA-256 records detect drift, not
 malicious tampering with both files and records.
 
 Archive the entire run plus its matching raw data and caches using suitable
-storage; these large files are intentionally excluded from Git. Commit small
+storage; raw data and caches are intentionally excluded from Git. The evaluated augmentation checkpoint is the single bundled exception under artifacts/augmentation-v1/. Commit small
 configs and research summaries. Capturing an old checkpoint today establishes
 its present identity only: it cannot recover the original code/environment or
 prove historical execution order.
@@ -189,6 +189,7 @@ prove historical execution order.
 ## Web application
 
 ```bash
+.venv/bin/python scripts/install_model.py
 .venv/bin/uvicorn --app-dir src fs_jump3d.web:app --host 127.0.0.1 --port 8000
 ```
 
