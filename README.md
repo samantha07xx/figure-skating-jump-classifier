@@ -37,6 +37,12 @@ The [experiment comparison](data/experiments/improvement_phase1/comparison.md) r
 
 ## Quick start: run the demo
 
+![Web demo showing an uploaded Axel clip and its predicted class probabilities](docs/images/demo-preview.png)
+
+Example prediction for a single FS-Jump3D clip. The displayed 93.1% is the
+predicted-class probability for this clip, not test accuracy. Video source:
+[FS-Jump3D](docs/DATA_AND_MODELS.md).
+
 Use Python 3.13. The following commands were verified on macOS arm64. The default
 requirements install the pinned dependency set used by the validated environment
 and CI. A trained checkpoint is included; no retraining or full dataset download
